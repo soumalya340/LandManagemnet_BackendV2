@@ -7,7 +7,7 @@ const {
 const {
   initializeNftContract,
   getNftContract,
-} = require("../utils/nftContra ctInstance");
+} = require("../utils/nftContractInstance");
 
 const router = express.Router();
 
@@ -1318,7 +1318,7 @@ router.post("/approve-transfer-execution", async (req, res) => {
     let requestData = await contract.requestStatus(requestId);
     let plotId = requestData.plotId;
 
-    // approve 
+    // approve
     await nftContract.approve(contract.address, plotId);
 
     const signerWalletLower = signerWallet.toLowerCase();
