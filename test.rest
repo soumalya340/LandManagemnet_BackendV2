@@ -1,0 +1,6 @@
+POST http://localhost:8000/api/setter/finalize-plot-transfer
+Content-Type: application/json
+
+{
+  "requestId": 1
+}
