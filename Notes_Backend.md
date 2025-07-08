@@ -1,5 +1,9 @@
 # API Endpoint Usage Guide
 
+# BASE URL :
+
+
+
 # Index of API Endpoints
 
 ## POST Endpoints
@@ -96,7 +100,7 @@
 **Why/When:** Use this to create a new land token with block and parcel information. Typically used by admin or authorized users to mint new tokens.
 
 ```
-POST https://landmanagemnet-backend.onrender.com/api/setter/create-token
+POST https://landmanagemnet-backendv2.onrender.com/api/setter/create-token
 Content-Type: application/json
 
 {
@@ -136,7 +140,7 @@ Content-Type: application/json
 **Why/When:** Use this to request the transfer of an entire plot from one address to another. Used by plot owners or authorized users to initiate a transfer.
 
 ```
-POST https://landmanagemnet-backend.onrender.com/api/setter/request-plot-transfer
+POST https://landmanagemnet-backendv2.onrender.com/api/setter/request-plot-transfer
 Content-Type: application/json
 
 {
@@ -179,7 +183,7 @@ Content-Type: application/json
 **Why/When:** Use this to request the transfer of a parcel (or parcels) from one address to another inside a plot. Used by parcel owners or authorized users.
 
 ```
-POST https://landmanagemnet-backend.onrender.com/api/setter/request-parcel-transfer
+POST https://landmanagemnet-backendv2.onrender.com/api/setter/request-parcel-transfer
 Content-Type: application/json
 
 {
@@ -225,7 +229,7 @@ Content-Type: application/json
 - Lawyer Authority = 3
 
 ```
-POST https://landmanagemnet-backend.onrender.com/api/setter/approve-transfer-execution
+POST https://landmanagemnet-backendv2.onrender.com/api/setter/approve-transfer-execution
 Content-Type: application/json
 
 {
@@ -269,7 +273,7 @@ Content-Type: application/json
 **Why/When:** Use this to initiate a new plot with the given parcel IDs and parcel amounts. Used by admin or authorized users during plot creation.
 
 ```
-POST https://landmanagemnet-backend.onrender.com/api/setter/plot-initiate
+POST https://landmanagemnet-backendv2.onrender.com/api/setter/plot-initiate
 Content-Type: application/json
 
 {
@@ -308,7 +312,7 @@ Content-Type: application/json
 **Why/When:** Get detailed information about a specific land token by its ID. Use this to display land details to users.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/getter/land/1
+GET https://landmanagemnet-backendv2.onrender.com/api/getter/land/1
 Content-Type: application/json
 ```
 
@@ -336,7 +340,7 @@ Content-Type: application/json
 **Why/When:** Retrieve detailed information about a specific plot account by its ID. Useful for showing plot composition and ownership.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/getter/plot/1/info
+GET https://landmanagemnet-backendv2.onrender.com/api/getter/plot/1/info
 Content-Type: application/json
 ```
 
@@ -362,7 +366,7 @@ Content-Type: application/json
 **Why/When:** Get a list of all plots in the system. Use this to display available plots or for admin overviews.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/getter/plots
+GET https://landmanagemnet-backendv2.onrender.com/api/getter/plots
 Content-Type: application/json
 ```
 
@@ -386,7 +390,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the token URI for a specific land token. Use this to fetch metadata or images for a token.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/getter/token/1/uri
+GET https://landmanagemnet-backendv2.onrender.com/api/getter/token/1/uri
 Content-Type: application/json
 ```
 
@@ -410,7 +414,7 @@ Content-Type: application/json
 **Why/When:** Check the status of a transfer request by its ID. Only the sender of the request can access its status. Use for tracking transfer progress.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/getter/transfer/1/status
+GET https://landmanagemnet-backendv2.onrender.com/api/getter/transfer/1/status
 Content-Type: application/json
 ```
 
@@ -445,7 +449,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the current plot ID and token ID from the contract. Useful for admin or for creating new records.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/getter/plot-and-token-id-info
+GET https://landmanagemnet-backendv2.onrender.com/api/getter/plot-and-token-id-info
 Content-Type: application/json
 ```
 
@@ -469,7 +473,7 @@ Content-Type: application/json
 **Why/When:** Get all shareholders for a specific parcel within a plot. Use this to display ownership breakdown for a parcel.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/get_plot/plot/1/parcel/101/shareholders
+GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/parcel/101/shareholders
 Content-Type: application/json
 ```
 
@@ -498,7 +502,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the number of shares a specific user owns in a plot parcel. Use for user dashboards or ownership checks.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/get_plot/plot/1/parcel/101/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/shares
+GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/parcel/101/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/shares
 Content-Type: application/json
 ```
 
@@ -524,7 +528,7 @@ Content-Type: application/json
 **Why/When:** Get the total number of shares for a specific parcel within a plot. Useful for calculating ownership percentages.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/get_plot/plot/1/parcel/101/total-shares
+GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/parcel/101/total-shares
 Content-Type: application/json
 ```
 
@@ -549,7 +553,7 @@ Content-Type: application/json
 **Why/When:** Get all parcels that a specific user owns shares in within a plot. Use for user dashboards or ownership overviews.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/parcels
+GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/parcels
 Content-Type: application/json
 ```
 
@@ -575,7 +579,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the ownership percentage of a specific user in a plot. The percentage is calculated based on the user's total shares compared to the plot's total shares.
 
 ```
-GET https://landmanagemnet-backend.onrender.com/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/ownership
+GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/ownership
 Content-Type: application/json
 ```
 
