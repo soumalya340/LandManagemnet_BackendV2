@@ -899,12 +899,6 @@ router.post("/approve-transfer-execution", async (req, res) => {
         },
       });
     }
-    // fetch the data
-    let requestData = await contract.requestStatus(requestId);
-    let plotId = requestData.plotId;
-
-    // approve
-    await nftContract.approve(contract.address, plotId);
 
     const signerWalletLower = signerWallet.toLowerCase();
     // approve and execute
@@ -1096,8 +1090,10 @@ router.post("/plot-initiate", async (req, res) => {
         },
       });
     }
+    console.log("Hello");
     const tx = await contract.plotInitiate(parcelIds, parcelAmounts);
     const receipt = await tx.wait();
+    console.log("hey");
     // Try to extract plotId from events if available
     let plotId = null;
     if (receipt && receipt.logs) {
