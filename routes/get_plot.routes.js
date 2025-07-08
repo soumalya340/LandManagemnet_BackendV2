@@ -393,7 +393,20 @@ router.get("/plot/:plotId/user/:userAddress/parcels", async (req, res) => {
     }
 
     const { plotId, userAddress } = req.params;
-    const { parcel } = req.query; // Optional query parameter
+
+    // Validate plotId is a valid number
+    const plotIdNumber = parseInt(plotId);
+    if (isNaN(plotIdNumber) || plotIdNumber < 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: "Invalid plot ID format",
+          details: "Plot ID must be a valid positive number",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/plot/:plotId/user/:userAddress/parcels",
+        },
+      });
+    }
 
     // Validate Ethereum address format
     if (!/^0x[a-fA-F0-9]{40}$/.test(userAddress)) {
@@ -410,17 +423,15 @@ router.get("/plot/:plotId/user/:userAddress/parcels", async (req, res) => {
     }
 
     const userParcels = await contract.getPlotAccountUserParcels(
-      plotId,
-      userAddress,
-      parcel || 0
+      plotIdNumber,
+      userAddress
     );
 
     res.json({
       success: true,
       data: {
-        plotId,
+        plotId: plotIdNumber,
         userAddress,
-        parcelFilter: parcel || "0", // Shows what parcel filter was used
         parcels: userParcels.map((p) => p.toString()),
         totalParcels: userParcels.length,
       },
