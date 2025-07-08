@@ -854,14 +854,6 @@ router.post("/approve-transfer-execution", async (req, res) => {
       contract = getContract();
     }
 
-    let nftContract;
-    try {
-      nftContract = getNftContract();
-    } catch (error) {
-      await initializeNftContract();
-      nftContract = getNftContract();
-    }
-
     const { signerWallet, requestId, role } = req.body;
 
     if (!signerWallet || !requestId || role === undefined) {
@@ -901,6 +893,9 @@ router.post("/approve-transfer-execution", async (req, res) => {
     }
 
     const signerWalletLower = signerWallet.toLowerCase();
+    console.log("signerWalletLower", signerWalletLower);
+    console.log("requestId", requestId);
+    console.log("role", role);
     // approve and execute
     const tx = await contract.delegateApproveAndTransfer(
       signerWalletLower,
