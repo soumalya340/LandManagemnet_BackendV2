@@ -194,7 +194,7 @@ router.get(
       const shares = await contract.getPlotAccountUserShares(
         plotId,
         parcelId,
-        userAddress
+        userAddress.toLowerCase()
       );
 
       res.json({
@@ -424,7 +424,7 @@ router.get("/plot/:plotId/user/:userAddress/parcels", async (req, res) => {
 
     const userParcels = await contract.getPlotAccountUserParcels(
       plotIdNumber,
-      userAddress
+      userAddress.toLowerCase()
     );
 
     res.json({
@@ -537,7 +537,7 @@ router.get("/plot/:plotId/user/:userAddress/ownership", async (req, res) => {
 
     const ownershipPercentage = await contract.getOwnershipPercentage(
       plotId,
-      userAddress
+      userAddress.toLowerCase()
     );
 
     res.json({

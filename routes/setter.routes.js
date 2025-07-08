@@ -1085,23 +1085,14 @@ router.post("/plot-initiate", async (req, res) => {
         },
       });
     }
-    console.log("Hello");
+    let beforePlotId = (await contract.getCurrentPlotAndTokenIdInfo())[0];
+    console.log("beforePlotId", beforePlotId);
     const tx = await contract.plotInitiate(parcelIds, parcelAmounts);
     const receipt = await tx.wait();
-    console.log("hey");
-    // Try to extract plotId from events if available
-    let plotId = null;
-    if (receipt && receipt.logs) {
-      for (const log of receipt.logs) {
-        try {
-          const parsed = contract.interface.parseLog(log);
-          if (parsed.name && parsed.args && parsed.args.plotId) {
-            plotId = parsed.args.plotId.toString();
-            break;
-          }
-        } catch (e) {}
-      }
-    }
+
+    let afterPlotId = Number(beforePlotId) + 1;
+    console.log("afterPlotId", afterPlotId);
+
     res.json({
       success: true,
       data: {
@@ -1110,7 +1101,9 @@ router.post("/plot-initiate", async (req, res) => {
           gasUsed: receipt.gasUsed?.toString(),
           status: receipt.status,
         },
-        plotId,
+        plotId: afterPlotId.toString(),
+        parcelIds,
+        parcelAmounts,
       },
       message: "Plot initiated successfully",
     });
