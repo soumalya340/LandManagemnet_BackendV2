@@ -4,11 +4,6 @@ const {
   getContract,
 } = require("../utils/contractInstance");
 
-const {
-  initializeNftContract,
-  getNftContract,
-} = require("../utils/nftContractInstance");
-
 const router = express.Router();
 
 /**
