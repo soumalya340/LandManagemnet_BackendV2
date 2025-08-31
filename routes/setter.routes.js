@@ -3,159 +3,16 @@ const {
   initializeContract,
   getContract,
 } = require("../utils/contractInstance");
+const { insertBlockParcelInfo } = require("../db/blockparcel");
+const { insertPlot } = require("../db/plots");
+const {
+  insertRequest,
+  checkRequestExists,
+  updateRequestStatus,
+} = require("../db/request");
 
 const router = express.Router();
 
-/**
- * @swagger
- * /api/setter/create-token:
- *   post:
- *     summary: Create Block Parcel Token
- *     description: Creates a new land token with block and parcel information
- *     tags: [Token]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - blockInfo
- *               - parcelInfo
- *               - tokenURI
- *               - totalSupply
- *             properties:
- *               blockInfo:
- *                 type: string
- *                 description: Information about the block
- *                 example: "Block A1"
- *               parcelInfo:
- *                 type: string
- *                 description: Information about the parcel
- *                 example: "Parcel P1"
- *               tokenURI:
- *                 type: string
- *                 description: URI pointing to token metadata
- *                 example: "https://example.com/token/metadata/1"
- *               totalSupply:
- *                 type: string
- *                 description: Total supply of the token
- *                 example: "1000"
- *           example:
- *             blockInfo: "Block A1"
- *             parcelInfo: "Parcel P1"
- *             tokenURI: "https://example.com/token/metadata/1"
- *             totalSupply: "1000"
- *     responses:
- *       200:
- *         description: Block parcel token created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     tokenId:
- *                       type: string
- *                       example: "1"
- *                     blockInfo:
- *                       type: string
- *                       example: "Block A1"
- *                     parcelInfo:
- *                       type: string
- *                       example: "Parcel P1"
- *                     tokenURI:
- *                       type: string
- *                       example: "https://example.com/token/metadata/1"
- *                     totalSupply:
- *                       type: string
- *                       example: "1000"
- *                     transaction:
- *                       type: object
- *                       properties:
- *                         hash:
- *                           type: string
- *                           example: "0x1234567890abcdef1234567890abcdef12345678"
- *                         from:
- *                           type: string
- *                           example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                         to:
- *                           type: string
- *                           example: "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
- *                         gasUsed:
- *                           type: string
- *                           example: "21000"
- *                         status:
- *                           type: number
- *                           example: 1
- *                     confirmedAt:
- *                       type: string
- *                       format: date-time
- *                 message:
- *                   type: string
- *                   example: "Block parcel token created successfully"
- *       400:
- *         description: Bad request - missing required fields
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/endpoint"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/endpoint"
- */
 router.post("/create-token", async (req, res) => {
   try {
     let contract;
@@ -204,6 +61,21 @@ router.post("/create-token", async (req, res) => {
       }
     }
 
+    // Save to database
+    try {
+      await insertBlockParcelInfo({
+        token_id: parseInt(tokenId),
+        parcel_name: parcelInfo,
+        block_name: blockInfo,
+        total_supply: totalSupply.toString(),
+        metadata: tokenURI.toString(),
+      });
+    } catch (dbError) {
+      console.error("Database insertion error:", dbError.message);
+    }
+
+    console.log("The Db Insertion was successful");
+
     res.json({
       success: true,
       data: {
@@ -235,140 +107,6 @@ router.post("/create-token", async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/setter/request-plot-transfer:
- *   post:
- *     summary: Request Whole Plot Transfer
- *     description: Creates a request to transfer an entire plot from one address to another
- *     tags: [Transfer]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - plotId
- *               - to
- *             properties:
- *               plotId:
- *                 type: string
- *                 description: The ID of the plot to transfer
- *                 example: "1"
- *               to:
- *                 type: string
- *                 pattern: "^0x[a-fA-F0-9]{40}$"
- *                 example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                 description: The recipient address for the plot transfer
- *           example:
- *             plotId: "1"
- *             to: "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
- *     responses:
- *       200:
- *         description: Plot transfer request created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     requestId:
- *                       type: string
- *                       example: "1"
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     to:
- *                       type: string
- *                       pattern: "^0x[a-fA-F0-9]{40}$"
- *                       example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                     transaction:
- *                       type: object
- *                       properties:
- *                         hash:
- *                           type: string
- *                           example: "0x1234567890abcdef1234567890abcdef12345678"
- *                         from:
- *                           type: string
- *                           example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                         to:
- *                           type: string
- *                           example: "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
- *                         gasUsed:
- *                           type: string
- *                           example: "21000"
- *                         status:
- *                           type: number
- *                           example: 1
- *                     confirmedAt:
- *                       type: string
- *                       format: date-time
- *                 message:
- *                   type: string
- *                   example: "Plot transfer request created successfully"
- *       400:
- *         description: Bad request - invalid input
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/endpoint"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/endpoint"
- */
 router.post("/request-plot-transfer", async (req, res) => {
   try {
     let contract;
@@ -421,21 +159,52 @@ router.post("/request-plot-transfer", async (req, res) => {
       }
     }
 
-    res.json({
-      success: true,
-      data: {
-        requestId,
-        plotId,
-        to,
-        transaction: {
-          hash: tx.hash,
-          gasUsed: receipt.gasUsed?.toString(),
-          status: receipt.status,
+    // Save request to database
+    try {
+      await insertRequest({
+        request_id: parseInt(requestId),
+        plot_id: parseInt(plotId),
+        land_authority: false,
+        lawyer: false,
+        bank: false,
+        current_status: "PENDING",
+      });
+      console.log("Request inserted into database:", requestId);
+
+      res.json({
+        success: true,
+        data: {
+          requestId,
+          plotId,
+          to,
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          confirmedAt: new Date().toISOString(),
         },
-        confirmedAt: new Date().toISOString(),
-      },
-      message: "Plot transfer request created successfully",
-    });
+        message: "Plot transfer request created successfully",
+      });
+    } catch (dbError) {
+      console.error("Database error:", dbError.message);
+      res.status(207).json({
+        success: true,
+        warning: "Transaction successful but database update failed",
+        data: {
+          requestId,
+          plotId,
+          to,
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          dbError: dbError.message,
+        },
+        message: "Plot transfer request created but database update failed",
+      });
+    }
   } catch (error) {
     console.error("Error in /api/setter/request-plot-transfer:", error.message);
     res.status(500).json({
@@ -450,152 +219,7 @@ router.post("/request-plot-transfer", async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/setter/request-parcel-transfer:
- *   post:
- *     summary: Request Parcel Transfer
- *     description: Creates a request to transfer a parcel (or parcels) from one address to another.
- *     tags: [Transfer]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - _parcelId
- *               - parcelAmount
- *               - to
- *               - _plotId
- *             properties:
- *               _parcelId:
- *                 type: integer
- *                 description: The ID of the parcel to transfer
- *                 example: 101
- *               parcelAmount:
- *                 type: integer
- *                 description: The amount of the parcel to transfer
- *                 example: 1000
- *               to:
- *                 type: string
- *                 pattern: "^0x[a-fA-F0-9]{40}$"
- *                 example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                 description: The recipient address for the parcel transfer
- *               _plotId:
- *                 type: integer
- *                 description: The plot ID associated with the parcel
- *                 example: 1
- *           example:
- *             _parcelId: 101
- *             parcelAmount: 1000
- *             to: "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
- *             _plotId: 1
- *     responses:
- *       200:
- *         description: Parcel transfer request created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     requestId:
- *                       type: string
- *                       example: "1"
- *                     _parcelId:
- *                       type: integer
- *                       example: 101
- *                     parcelAmount:
- *                       type: integer
- *                       example: 1000
- *                     to:
- *                       type: string
- *                       pattern: "^0x[a-fA-F0-9]{40}$"
- *                       example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                     _plotId:
- *                       type: integer
- *                       example: 1
- *                     transaction:
- *                       type: object
- *                       properties:
- *                         hash:
- *                           type: string
- *                           example: "0x1234567890abcdef1234567890abcdef12345678"
- *                         gasUsed:
- *                           type: string
- *                           example: "21000"
- *                         status:
- *                           type: number
- *                           example: 1
- *                     confirmedAt:
- *                       type: string
- *                       format: date-time
- *                 message:
- *                   type: string
- *                   example: "Parcel transfer request created successfully"
- *       400:
- *         description: Bad request - invalid input
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/request-parcel-transfer"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/request-parcel-transfer"
- */
+// REQUEST FOR PARCEL INSIDE PLOT TRANSFER
 router.post("/request-parcel-transfer", async (req, res) => {
   try {
     let contract;
@@ -694,156 +318,6 @@ router.post("/request-parcel-transfer", async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/setter/approve-transfer-execution:
- *   post:
- *     summary: Delegate Approve Transfer Execution
- *     description: |
- *       Approves and executes a transfer request by a delegated authority (Land Authority, Bank, or Lawyer).
- *       Each role has specific approval rights in the transfer process.
- *     tags: [Transfer]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - signerWallet
- *               - requestId
- *               - role
- *             properties:
- *               signerWallet:
- *                 type: string
- *                 pattern: "^0x[a-fA-F0-9]{40}$"
- *                 example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                 description: The wallet address of the approving authority
- *               requestId:
- *                 type: string
- *                 description: The ID of the transfer request to approve
- *                 example: "1"
- *               role:
- *                 type: integer
- *                 enum: [1, 2, 3]
- *                 description: |
- *                   The role of the approving authority:
- *                   - 1: Land Authority
- *                   - 2: Bank
- *                   - 3: Lawyer
- *                 example: 1
- *           example:
- *             signerWallet: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *             requestId: "1"
- *             role: 1
- *     responses:
- *       200:
- *         description: Transfer request approved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     requestId:
- *                       type: string
- *                       example: "1"
- *                     signerWallet:
- *                       type: string
- *                       pattern: "^0x[a-fA-F0-9]{40}$"
- *                       example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                     role:
- *                       type: integer
- *                       example: 1
- *                     roleName:
- *                       type: string
- *                       example: "Land Authority"
- *                     transaction:
- *                       type: object
- *                       properties:
- *                         hash:
- *                           type: string
- *                           example: "0x1234567890abcdef1234567890abcdef12345678"
- *                         from:
- *                           type: string
- *                           example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                         to:
- *                           type: string
- *                           example: "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
- *                         gasUsed:
- *                           type: string
- *                           example: "21000"
- *                         status:
- *                           type: number
- *                           example: 1
- *                     confirmedAt:
- *                       type: string
- *                       format: date-time
- *                 message:
- *                   type: string
- *                   example: "Transfer request approved successfully by Land Authority"
- *       400:
- *         description: Bad request - invalid input or role
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/endpoint"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/endpoint"
- */
 router.post("/approve-transfer-execution", async (req, res) => {
   try {
     let contract;
@@ -897,12 +371,34 @@ router.post("/approve-transfer-execution", async (req, res) => {
     console.log("requestId", requestId);
     console.log("role", role);
     // approve and execute
+    // Check if request exists in database
+    const existingRequest = await checkRequestExists(parseInt(requestId));
+    if (!existingRequest) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: "Transfer request not found",
+          details: "No plot transfer request found with this ID",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/approve-transfer",
+        },
+      });
+    }
+
     const tx = await contract.delegateApproveAndTransfer(
       signerWalletLower,
       requestId,
       role
     );
     const receipt = await tx.wait();
+
+    // Update request status in database
+    try {
+      await updateRequestStatus(parseInt(requestId), parseInt(role));
+    } catch (dbError) {
+      console.error("Database update error:", dbError.message);
+      // Continue with response as transaction was successful
+    }
 
     const roleNames = { 1: "Land Authority", 2: "Bank", 3: "Lawyer" };
 
@@ -1067,6 +563,8 @@ router.post("/plot-initiate", async (req, res) => {
       contract = getContract();
     }
     const { parcelIds, parcelAmounts } = req.body;
+
+    // Input validation
     if (
       !Array.isArray(parcelIds) ||
       !Array.isArray(parcelAmounts) ||
@@ -1085,28 +583,86 @@ router.post("/plot-initiate", async (req, res) => {
         },
       });
     }
+
+    // Get current plot ID before transaction
     let beforePlotId = (await contract.getCurrentPlotAndTokenIdInfo())[0];
     console.log("beforePlotId", beforePlotId);
+
+    // Execute contract transaction
     const tx = await contract.plotInitiate(parcelIds, parcelAmounts);
+
+    // Get signer's address from the transaction
+    const ownerAddress = tx.from;
     const receipt = await tx.wait();
 
-    let afterPlotId = Number(beforePlotId) + 1;
-    console.log("afterPlotId", afterPlotId);
+    let plotId = Number(beforePlotId) + 1;
+    console.log("new plotId", plotId);
 
-    res.json({
-      success: true,
-      data: {
-        transaction: {
-          hash: tx.hash,
-          gasUsed: receipt.gasUsed?.toString(),
-          status: receipt.status,
+    // Save plot data to database
+    console.log("Owner Address :", ownerAddress);
+    try {
+      const plotData = {
+        plot_id: plotId,
+        current_holder: ownerAddress,
+        list_of_parcels: parcelIds,
+        amount: parcelAmounts,
+      };
+
+      // Validate data fields before insertion
+      const requiredFields = [
+        "plot_id",
+        "current_holder",
+        "list_of_parcels",
+        "amount",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !plotData.hasOwnProperty(field)
+      );
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
+      }
+
+      const insertedPlot = await insertPlot(plotData);
+
+      if (!insertedPlot) {
+        throw new Error("Failed to insert plot data into database");
+      }
+
+      res.json({
+        success: true,
+        data: {
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          plotId: plotId.toString(),
+          parcelIds,
+          parcelAmounts,
+          dbRecord: insertedPlot,
         },
-        plotId: afterPlotId.toString(),
-        parcelIds,
-        parcelAmounts,
-      },
-      message: "Plot initiated successfully",
-    });
+        message: "Plot initiated and saved to database successfully",
+      });
+    } catch (dbError) {
+      console.error("Database plot insertion error:", dbError.message);
+      // Still return success but with warning about DB
+      res.status(207).json({
+        success: true,
+        warning: "Transaction successful but database update failed",
+        data: {
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          plotId: plotId.toString(),
+          parcelIds,
+          parcelAmounts,
+          dbError: dbError.message,
+        },
+        message: "Plot initiated but database update failed",
+      });
+    }
   } catch (error) {
     console.error("Error in /api/setter/plot-initiate:", error.message);
     res.status(500).json({

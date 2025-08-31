@@ -1,7 +1,15 @@
+## Test Database Connection
+GET http://localhost:8000/api/db/test-connection
+
+### Delete Block Parcel
+DELETE http://localhost:8000/api/admin/block-parcel/1
+
+### Drop Table
+DELETE http://localhost:8000/api/admin/table/blockparcelinfo
+
 ## Approve and Execute
 
 ### Approve
-
 POST http://localhost:8000/api/setter/approve-transfer-execution
 Content-Type: application/json
 
@@ -10,3 +18,119 @@ Content-Type: application/json
   "requestId": "1",
   "role": 1
 }
+
+## Database Management Operations
+### Create Table - Users
+POST http://localhost:8000/api/db-management/create-table/users
+Content-Type: application/json
+
+{
+  "columns": "id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, email VARCHAR(100) UNIQUE, password VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+}
+
+### Show Table - Users
+GET http://localhost:8000/api/db-management/show-table/users
+
+### Test Insertion - Users
+POST http://localhost:8000/api/db-management/test-insertion/users
+Content-Type: application/json
+
+{
+  "columns": ["username", "email", "password"],
+  "values": ["john_doe", "john@example4.com", "password123"]
+}
+
+### Test Insertion - Users (Another Record)
+POST http://localhost:8000/api/db-management/test-insertion/users
+Content-Type: application/json
+
+{
+  "columns": ["username", "email", "password"],
+  "values": ["jane_smith", "jane@example.com", "securepass456"]
+}
+
+### Drop Table - Users
+DELETE http://localhost:8000/api/db-management/table/users
+
+#### BLOCKC AND PARCEL OPERATIONS
+
+### DELETE BLOCK AND PARCEL TABLE
+DELETE http://localhost:8000/api/db-management/table/blockparcelinfo
+
+
+
+### Create Token
+POST http://localhost:8000/api/setter/create-token
+Content-Type: application/json
+
+{
+  "blockInfo": "Block A1",
+  "parcelInfo": "Parcel 5",
+  "tokenURI": "https://example.com/metadata/token5",
+  "totalSupply": 1000
+}
+
+### GET BLOCK AND PARCEL DATA
+GET http://localhost:8000/api/db-management/show-table/blockparcelinfo
+
+
+### PLOT OPERATIONS
+
+
+### Create Plot
+POST http://localhost:8000/api/setter/plot-initiate
+Content-Type: application/json
+
+{
+  "parcelIds": [17, 18],
+  "parcelAmounts": [100, 100]
+}
+
+### GET PLOTS TABLE
+GET http://localhost:8000/api/db-management/show-table/plots
+
+
+### TRANSFER OPERATIONS
+
+### Request Plot Transfer
+POST http://localhost:8000/api/setter/request-plot-transfer
+Content-Type: application/json
+
+{
+  "plotId": 20,
+  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
+}
+
+
+### Approve Transfer (Land Authority)
+POST http://localhost:8000/api/setter/approve-transfer-execution
+Content-Type: application/json
+
+{
+  "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+  "requestId": "14",
+  "role": 1
+}
+
+### Approve Transfer (Bank)
+POST http://localhost:8000/api/setter/approve-transfer-execution
+Content-Type: application/json
+
+{
+  "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+  "requestId": "14",
+  "role": 2
+}
+
+### Approve Transfer (Lawyer)
+POST http://localhost:8000/api/setter/approve-transfer-execution
+Content-Type: application/json
+
+{
+  "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+  "requestId": "14",
+  "role": 3
+}
+
+### GET REQUEST DATA
+GET http://localhost:8000/api/db-management/show-table/request

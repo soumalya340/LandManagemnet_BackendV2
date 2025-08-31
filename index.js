@@ -6,6 +6,7 @@ const { initializeContract, contract } = require("./utils/contractInstance");
 const getterRoutes = require("./routes/getter.routes");
 const setterRoutes = require("./routes/setter.routes");
 const getPlotRoutes = require("./routes/get_plot.routes");
+const dbManagementRoutes = require("./routes/db-management.routes");
 const { swaggerUi, specs } = require("./config/swagger");
 
 const app = express();
@@ -68,6 +69,7 @@ app.use(
 app.use("/api/getter", getterRoutes);
 app.use("/api/setter", setterRoutes);
 app.use("/api/get_plot", getPlotRoutes);
+app.use("/api/db-management", dbManagementRoutes);
 
 // Function to start the server
 async function startServer() {

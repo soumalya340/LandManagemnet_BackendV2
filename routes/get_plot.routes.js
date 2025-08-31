@@ -5,61 +5,6 @@ const {
 } = require("../utils/contractInstance");
 const router = express.Router();
 
-/**
- * @swagger
- * /api/get_plot/plot/{plotId}/parcel/{parcelId}/shareholders:
- *   get:
- *     summary: Get Plot Parcel Shareholders
- *     description: Retrieves all shareholders for a specific parcel within a plot
- *     tags: [Plot]
- *     parameters:
- *       - $ref: '#/components/parameters/PlotId'
- *       - name: parcelId
- *         in: path
- *         required: true
- *         description: The ID of the parcel
- *         schema:
- *           type: integer
- *           minimum: 1
- *           example: 101
- *     responses:
- *       200:
- *         description: Plot parcel shareholders retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     parcelId:
- *                       type: string
- *                       example: "101"
- *                     shareholders:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/EthereumAddress'
- *                       example: ["0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0", "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"]
- *                     totalShareholders:
- *                       type: number
- *                       example: 2
- *                 message:
- *                   type: string
- *                   example: "Plot parcel shareholders retrieved successfully"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
 router.get("/plot/:plotId/parcel/:parcelId/shareholders", async (req, res) => {
   try {
     let contract;
@@ -103,65 +48,6 @@ router.get("/plot/:plotId/parcel/:parcelId/shareholders", async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/get_plot/plot/{plotId}/parcel/{parcelId}/user/{userAddress}/shares:
- *   get:
- *     summary: Get User Shares in Plot Parcel
- *     description: Retrieves the number of shares a specific user owns in a plot parcel
- *     tags: [Plot]
- *     parameters:
- *       - $ref: '#/components/parameters/PlotId'
- *       - name: parcelId
- *         in: path
- *         required: true
- *         description: The ID of the parcel
- *         schema:
- *           type: integer
- *           minimum: 1
- *           example: 101
- *       - $ref: '#/components/parameters/EthereumAddressParam'
- *     responses:
- *       200:
- *         description: User shares in plot parcel retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     parcelId:
- *                       type: string
- *                       example: "101"
- *                     userAddress:
- *                       $ref: '#/components/schemas/EthereumAddress'
- *                     shares:
- *                       type: string
- *                       example: "500"
- *                 message:
- *                   type: string
- *                   example: "User shares in plot parcel retrieved successfully"
- *       400:
- *         description: Bad request - invalid user address format
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
 router.get(
   "/plot/:plotId/parcel/:parcelId/user/:userAddress/shares",
   async (req, res) => {

@@ -66,4 +66,5 @@ function getContract() {
 module.exports = {
   initializeContract,
   getContract,
+  signer,
 };
