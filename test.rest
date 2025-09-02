@@ -1,16 +1,16 @@
 ## Test Database Connection
-GET http://localhost:8000/api/db/test-connection
+GET https://landmanagemnet-backendv2.onrender.com/api/db/test-connection
 
 ### Delete Block Parcel
-DELETE http://localhost:8000/api/admin/block-parcel/1
+DELETE https://landmanagemnet-backendv2.onrender.com/api/admin/block-parcel/1
 
 ### Drop Table
-DELETE http://localhost:8000/api/admin/table/blockparcelinfo
+DELETE https://landmanagemnet-backendv2.onrender.com/api/admin/table/blockparcelinfo
 
 ## Approve and Execute
 
 ### Approve
-POST http://localhost:8000/api/setter/approve-transfer-execution
+POST https://landmanagemnet-backendv2.onrender.com/api/setter/approve-transfer-execution
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
 
 ## Database Management Operations
 ### Create Table - Users
-POST http://localhost:8000/api/db-management/create-table/users
+POST https://landmanagemnet-backendv2.onrender.com/api/db-management/create-table/users
 Content-Type: application/json
 
 {
@@ -52,6 +52,9 @@ Content-Type: application/json
 ### Drop Table - Users
 DELETE http://localhost:8000/api/db-management/table/users
 
+### Drop Table - Plots
+DELETE http://localhost:8000/api/db-management/table/plots
+
 #### BLOCKC AND PARCEL OPERATIONS
 
 ### DELETE BLOCK AND PARCEL TABLE
@@ -65,7 +68,7 @@ Content-Type: application/json
 
 {
   "blockInfo": "Block A1",
-  "parcelInfo": "Parcel 5",
+  "parcelInfo": "Parcel 3",
   "tokenURI": "https://example.com/metadata/token5",
   "totalSupply": 1000
 }
@@ -73,6 +76,8 @@ Content-Type: application/json
 ### GET BLOCK AND PARCEL DATA
 GET http://localhost:8000/api/db-management/show-table/blockparcelinfo
 
+### ONRENDER FOR BLOCK AND PARCEL
+GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/blockparcelinfo
 
 ### PLOT OPERATIONS
 
@@ -82,17 +87,38 @@ POST http://localhost:8000/api/setter/plot-initiate
 Content-Type: application/json
 
 {
-  "parcelIds": [17, 18],
+  "plotName": "Plot 1",
+  "parcelIds": [1, 2],
   "parcelAmounts": [100, 100]
 }
 
 ### GET PLOTS TABLE
 GET http://localhost:8000/api/db-management/show-table/plots
 
+### GET PLOTS TABLE Using Render
+GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/plots
+
 
 ### TRANSFER OPERATIONS
 
-### Request Plot Transfer
+### Create Request Table
+POST http://localhost:8000/api/db-management/create-table/request
+Content-Type: application/json
+
+{
+  "columns": "id SERIAL PRIMARY KEY, request_id INTEGER NOT NULL, plot_id INTEGER NOT NULL, is_plot BOOLEAN NOT NULL, land_authority BOOLEAN DEFAULT FALSE, lawyer BOOLEAN DEFAULT FALSE, bank BOOLEAN DEFAULT FALSE, current_status VARCHAR(50) DEFAULT 'PENDING', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, UNIQUE(request_id)"
+}
+
+### Request Plot Transfer (Plot ID 1)
+POST http://localhost:8000/api/setter/request-plot-transfer
+Content-Type: application/json
+
+{
+  "plotId": 1,
+  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
+}
+
+### Request Plot Transfer (Plot ID 20)
 POST http://localhost:8000/api/setter/request-plot-transfer
 Content-Type: application/json
 
@@ -101,6 +127,40 @@ Content-Type: application/json
   "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
 }
 
+### Request Plot Transfer (Different Recipient)
+POST http://localhost:8000/api/setter/request-plot-transfer
+Content-Type: application/json
+
+{
+  "plotId": 2,
+  "to": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
+}
+
+### Request Parcel Transfer (Within Plot 1)
+POST http://localhost:8000/api/setter/request-parcel-transfer
+Content-Type: application/json
+
+{
+  "_parcelId": 1,
+  "parcelAmount": 1,
+  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD",
+  "_plotId": 1
+}
+
+### Request Parcel Transfer (Within Plot 20)
+POST http://localhost:8000/api/setter/request-parcel-transfer
+Content-Type: application/json
+
+{
+  "_parcelId": 1,
+  "parcelAmount": 75,
+  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD",
+  "_plotId": 20
+}
+
+### View Request Table
+GET http://localhost:8000/api/db-management/show-table/request
+
 
 ### Approve Transfer (Land Authority)
 POST http://localhost:8000/api/setter/approve-transfer-execution
@@ -108,7 +168,7 @@ Content-Type: application/json
 
 {
   "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
-  "requestId": "14",
+  "requestId": "1",
   "role": 1
 }
 
@@ -134,3 +194,10 @@ Content-Type: application/json
 
 ### GET REQUEST DATA
 GET http://localhost:8000/api/db-management/show-table/request
+
+### ONRENDER FOR REQUEST
+GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/request
+
+
+### DELETE THE REQUEST 
+DELETE http://localhost:8000/api/db-management/table/request

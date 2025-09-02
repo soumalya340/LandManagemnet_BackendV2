@@ -83,10 +83,12 @@ async function insertRequest(data) {
             id SERIAL PRIMARY KEY,
             request_id INTEGER NOT NULL,
             plot_id INTEGER NOT NULL,
+            is_plot BOOLEAN NOT NULL,
             land_authority BOOLEAN NOT NULL,
             lawyer BOOLEAN NOT NULL,
             bank BOOLEAN NOT NULL,
             current_status VARCHAR(100) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(request_id)
         `;
 
@@ -99,13 +101,14 @@ async function insertRequest(data) {
   try {
     client = await db.connect();
     const query = `
-      INSERT INTO request (request_id, plot_id, land_authority, lawyer, bank, current_status)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO request (request_id, plot_id, is_plot, land_authority, lawyer, bank, current_status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
     const result = await client.query(query, [
       data.request_id,
       data.plot_id,
+      data.is_plot,
       data.land_authority,
       data.lawyer,
       data.bank,

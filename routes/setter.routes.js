@@ -164,6 +164,7 @@ router.post("/request-plot-transfer", async (req, res) => {
       await insertRequest({
         request_id: parseInt(requestId),
         plot_id: parseInt(plotId),
+        is_plot: true, // This is a plot transfer
         land_authority: false,
         lawyer: false,
         bank: false,
@@ -284,23 +285,57 @@ router.post("/request-parcel-transfer", async (req, res) => {
       }
     }
 
-    res.json({
-      success: true,
-      data: {
-        requestId,
-        _parcelId,
-        parcelAmount,
-        to,
-        _plotId,
-        transaction: {
-          hash: tx.hash,
-          gasUsed: receipt.gasUsed?.toString(),
-          status: receipt.status,
+    // Save request to database
+    try {
+      await insertRequest({
+        request_id: parseInt(requestId),
+        plot_id: parseInt(_plotId),
+        is_plot: false, // This is a parcel transfer
+        land_authority: false,
+        lawyer: false,
+        bank: false,
+        current_status: "PENDING",
+      });
+      console.log("Parcel transfer request inserted into database:", requestId);
+
+      res.json({
+        success: true,
+        data: {
+          requestId,
+          _parcelId,
+          parcelAmount,
+          to,
+          _plotId,
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          confirmedAt: new Date().toISOString(),
         },
-        confirmedAt: new Date().toISOString(),
-      },
-      message: "Parcel transfer request created successfully",
-    });
+        message: "Parcel transfer request created successfully",
+      });
+    } catch (dbError) {
+      console.error("Database error:", dbError.message);
+      res.status(207).json({
+        success: true,
+        warning: "Transaction successful but database update failed",
+        data: {
+          requestId,
+          _parcelId,
+          parcelAmount,
+          to,
+          _plotId,
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          dbError: dbError.message,
+        },
+        message: "Parcel transfer request created but database update failed",
+      });
+    }
   } catch (error) {
     console.error(
       "Error in /api/setter/request-parcel-transfer:",
@@ -562,10 +597,11 @@ router.post("/plot-initiate", async (req, res) => {
       await initializeContract();
       contract = getContract();
     }
-    const { parcelIds, parcelAmounts } = req.body;
+    const { plotName, parcelIds, parcelAmounts } = req.body;
 
     // Input validation
     if (
+      !plotName ||
       !Array.isArray(parcelIds) ||
       !Array.isArray(parcelAmounts) ||
       parcelIds.length !== parcelAmounts.length ||
@@ -575,8 +611,9 @@ router.post("/plot-initiate", async (req, res) => {
         success: false,
         error: {
           message:
-            "parcelIds and parcelAmounts must be non-empty arrays of equal length",
-          details: "Both arrays are required and must have the same length.",
+            "plotName, parcelIds and parcelAmounts are required. Arrays must be non-empty and of equal length",
+          details:
+            "Please provide plotName (string), parcelIds and parcelAmounts (arrays of equal length).",
           code: "INVALID_INPUT",
           timestamp: new Date().toISOString(),
           endpoint: "/api/setter/plot-initiate",
@@ -589,7 +626,7 @@ router.post("/plot-initiate", async (req, res) => {
     console.log("beforePlotId", beforePlotId);
 
     // Execute contract transaction
-    const tx = await contract.plotInitiate(parcelIds, parcelAmounts);
+    const tx = await contract.plotInitiate(plotName, parcelIds, parcelAmounts);
 
     // Get signer's address from the transaction
     const ownerAddress = tx.from;
@@ -603,6 +640,7 @@ router.post("/plot-initiate", async (req, res) => {
     try {
       const plotData = {
         plot_id: plotId,
+        plot_name: plotName,
         current_holder: ownerAddress,
         list_of_parcels: parcelIds,
         amount: parcelAmounts,
@@ -611,6 +649,7 @@ router.post("/plot-initiate", async (req, res) => {
       // Validate data fields before insertion
       const requiredFields = [
         "plot_id",
+        "plot_name",
         "current_holder",
         "list_of_parcels",
         "amount",
@@ -637,6 +676,7 @@ router.post("/plot-initiate", async (req, res) => {
             status: receipt.status,
           },
           plotId: plotId.toString(),
+          plotName,
           parcelIds,
           parcelAmounts,
           dbRecord: insertedPlot,
@@ -656,6 +696,7 @@ router.post("/plot-initiate", async (req, res) => {
             status: receipt.status,
           },
           plotId: plotId.toString(),
+          plotName,
           parcelIds,
           parcelAmounts,
           dbError: dbError.message,

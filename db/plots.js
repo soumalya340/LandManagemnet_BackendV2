@@ -2,7 +2,13 @@ const { createTable, db } = require("./db_utils");
 
 // Helper function to count data fields
 function countDataFields(data) {
-  const expectedFields = ["plot_id", "current_holder", "list_of_parcels", "amount"];
+  const expectedFields = [
+    "plot_id",
+    "plot_name",
+    "current_holder",
+    "list_of_parcels",
+    "amount",
+  ];
   const actualFields = Object.keys(data);
 
   console.log("Expected fields:", expectedFields.length);
@@ -27,32 +33,33 @@ async function insertPlot(data) {
             SELECT FROM information_schema.tables 
             WHERE table_name = 'plots'
         )`);
-    
+
     if (tableExists.rows[0].exists) {
-      // Check if amount column exists
+      // Check if plot_name column exists
       const columnExists = await db.query(`
         SELECT EXISTS (
           SELECT FROM information_schema.columns 
-          WHERE table_name = 'plots' AND column_name = 'amount'
+          WHERE table_name = 'plots' AND column_name = 'plot_name'
         )`);
-      
+
       if (!columnExists.rows[0].exists) {
         // Drop and recreate table if schema is wrong
         console.log("⚠️ Table schema mismatch. Recreating plots table...");
         await db.query("DROP TABLE IF EXISTS plots");
       }
     }
-    
+
     // Create table if it doesn't exist or was dropped
     const tableExistsAfter = await db.query(`
         SELECT EXISTS (
             SELECT FROM information_schema.tables 
             WHERE table_name = 'plots'
         )`);
-        
+
     if (!tableExistsAfter.rows[0].exists) {
       const columns = `
         plot_id INTEGER PRIMARY KEY,
+        plot_name VARCHAR(255) NOT NULL,
         current_holder VARCHAR(255) NOT NULL,
         list_of_parcels NUMERIC[] NOT NULL,
         amount NUMERIC[] NOT NULL,
@@ -88,12 +95,13 @@ async function insertPlot(data) {
     }
 
     const query = `
-      INSERT INTO plots (plot_id, current_holder, list_of_parcels, amount)
-      VALUES ($1, $2, $3 , $4)
+      INSERT INTO plots (plot_id, plot_name, current_holder, list_of_parcels, amount)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
     const values = [
       data.plot_id,
+      data.plot_name,
       data.current_holder,
       data.list_of_parcels,
       data.amount,
