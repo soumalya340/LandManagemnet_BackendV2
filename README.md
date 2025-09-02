@@ -19,17 +19,26 @@ This backend service acts as a bridge between the frontend applications and the 
 
 ```
 backend/
-├── index.js                 # Main server entry point
-├── package.json            # Dependencies and scripts
-├── test.rest              # API testing file
-├── .gitignore             # Git ignore rules
-├── routes/                # API route handlers
-│   ├── getter.routes.js   # Read-only contract functions
-│   ├── setter.route.js    # State-changing contract functions
-│   └── get_plot.routes.js # Plot-specific operations
-└── utils/                 # Utility functions
-    ├── contractInstance.js # Contract initialization
-    └── abi.json           # Contract ABI definitions
+├── index.js                      # Main server entry point with Swagger UI
+├── package.json                  # Dependencies and scripts
+├── test.rest                     # API testing file with comprehensive examples
+├── .gitignore                    # Git ignore rules
+├── routes/                       # API route handlers
+│   ├── getter.routes.js          # Read-only blockchain contract functions
+│   ├── setter.routes.js          # State-changing blockchain operations
+│   ├── get_plot.routes.js        # Plot-specific query operations
+│   ├── db-management.routes.js   # Database management operations
+│   └── admin.js                  # Administrative functions
+├── utils/                        # Utility functions
+│   ├── contractInstance.js       # Contract initialization and management
+│   └── abi.json                  # Smart contract ABI definitions
+├── db/                           # Database operations
+│   ├── db_utils.js              # Database utility functions
+│   ├── blockparcel.js           # Block parcel data operations
+│   ├── plots.js                 # Plot data operations
+│   └── request.js               # Transfer request operations
+└── config/                      # Configuration files
+    └── swagger.js               # Swagger API documentation setup
 ```
 
 ## 🚀 Quick Start
@@ -69,6 +78,12 @@ backend/
    PRIVATE_KEY=your_private_key_here
    CONTRACT_ADDRESS=your_deployed_contract_address
 
+   # Database Configuration  
+   DB_HOST=your_database_host
+   DB_USER=your_database_user
+   DB_NAME=your_database_name
+   DB_PASSWORD=your_database_password
+
    # Network Configuration (choose one)
    # Local Development
    # RPC_URL=http://localhost:8545
@@ -76,7 +91,7 @@ backend/
    # Base Testnet
    # RPC_URL=https://sepolia.base.org
 
-   # Polygon Testnet
+   # Polygon Testnet  
    # RPC_URL=https://rpc-amoy.polygon.technology
    ```
 
@@ -102,43 +117,110 @@ backend/
 http://localhost:8000/api
 ```
 
+### 📖 API Documentation
+
+Interactive API documentation is available at:
+```
+http://localhost:8000/api-docs
+```
+
 ### Getter Endpoints (Read-Only Operations)
 
-#### Contract Information
+#### Land & Token Information
+- `GET /getter/land/:tokenId` - Get detailed land information by token ID
+- `GET /getter/token/:tokenId/uri` - Get token metadata URI
+- `GET /getter/plots` - Get list of all plots in the system
+- `GET /getter/plot-and-token-id-info` - Get current plot and token ID counters
 
-- `GET /getter/contract-info` - Get basic contract information
-- `GET /getter/land/:tokenId` - Get land information by token ID
-- `GET /getter/token/:tokenId/uri` - Get token URI
-- `GET /getter/balance/:address/:tokenId` - Get token balance for address
+#### Plot Account Information
+- `GET /getter/plot/:plotId/info` - Get plot account details (parcel IDs, amounts, owner)
 
-#### Plot Operations
+#### Transfer Request Status
+- `GET /getter/transfer/:requestId/status` - Get transfer request status and approvals
 
-- `GET /get_plot/plots` - Get all plots list
-- `GET /get_plot/:plotId/info` - Get plot account information
-- `GET /get_plot/:plotId/parcel/:parcelId/shareholders` - Get parcel shareholders
-- `GET /get_plot/:plotId/user/:userAddress/shares` - Get user shares in plot
-- `GET /get_plot/:plotId/user/:userAddress/ownership` - Get user ownership percentage
+### Plot Query Endpoints (Detailed Plot Operations)
+
+#### Plot Parcel Information
+- `GET /get_plot/plot/:plotId/parcel/:parcelId/shareholders` - Get all shareholders of a parcel
+- `GET /get_plot/plot/:plotId/parcel/:parcelId/total-shares` - Get total shares for a parcel
+- `GET /get_plot/plot/:plotId/parcel/:parcelId/user/:userAddress/shares` - Get user's shares in specific parcel
+
+#### User Plot Information  
+- `GET /get_plot/plot/:plotId/user/:userAddress/parcels` - Get all parcels a user owns in a plot
+- `GET /get_plot/plot/:plotId/user/:userAddress/ownership` - Get user's ownership percentage in a plot
 
 ### Setter Endpoints (State-Changing Operations)
 
-#### Administrative Functions
-
-- `POST /setter/set-plot-registry` - Set plot registry contract address
-- `POST /setter/set-plot-ownership` - Set plot ownership contract address
+#### Token & Plot Creation
 - `POST /setter/create-token` - Create new block parcel token
+  ```json
+  {
+    "blockInfo": "Block A1",
+    "parcelInfo": "Parcel 3", 
+    "tokenURI": "https://example.com/metadata/token5",
+    "totalSupply": 1000
+  }
+  ```
 
-#### Plot Management
-
-- `POST /setter/plot/initiate` - Initiate plot creation
-- `POST /setter/plot/finalize` - Finalize plot registration
+- `POST /setter/plot-initiate` - Initiate a new plot with parcels
+  ```json
+  {
+    "plotName": "Plot 1",
+    "parcelIds": [1, 2],
+    "parcelAmounts": [100, 100]
+  }
+  ```
 
 #### Transfer Operations
+- `POST /setter/request-plot-transfer` - Request transfer of entire plot
+  ```json
+  {
+    "plotId": 1,
+    "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
+  }
+  ```
 
-- `POST /setter/transfer/parcel/request` - Request parcel transfer
-- `POST /setter/transfer/plot/request` - Request whole plot transfer
-- `POST /setter/transfer/approve` - Approve transfer (authorities)
-- `POST /setter/transfer/parcel/finalize` - Finalize parcel transfer
-- `POST /setter/transfer/plot/finalize` - Finalize plot transfer
+- `POST /setter/request-parcel-transfer` - Request partial parcel transfer
+  ```json
+  {
+    "_parcelId": 1,
+    "parcelAmount": 75,
+    "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD",
+    "_plotId": 20
+  }
+  ```
+
+#### Transfer Approvals (Multi-signature)
+- `POST /setter/approve-transfer-execution` - Approve transfer by authority
+  ```json
+  {
+    "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+    "requestId": "1",
+    "role": 1
+  }
+  ```
+  
+  **Roles:**
+  - `1`: Land Authority
+  - `2`: Bank  
+  - `3`: Lawyer
+
+### Database Management Endpoints
+
+#### Table Operations
+- `GET /db-management/show-table/:tableName` - View data from any table
+- `POST /db-management/create-table/:tableName` - Create new table with custom schema
+- `DELETE /db-management/table/:tableName` - Drop entire table
+- `POST /db-management/test-insertion/:tableName` - Test data insertion
+
+#### Database Health
+- `GET /db/test-connection` - Test database connectivity
+
+### Administrative Endpoints
+
+#### Data Management
+- `DELETE /admin/block-parcel/:id` - Delete specific block parcel record
+- `DELETE /admin/table/:tableName` - Administrative table operations
 
 ## 🔧 Configuration
 
@@ -151,6 +233,10 @@ http://localhost:8000/api
 | `RPC_URL`          | Blockchain RPC endpoint      | Yes      | -           |
 | `PRIVATE_KEY`      | Private key for transactions | Yes      | -           |
 | `CONTRACT_ADDRESS` | Deployed contract address    | Yes      | -           |
+| `DB_HOST`          | Database host address        | Yes      | -           |
+| `DB_USER`          | Database username           | Yes      | -           |
+| `DB_NAME`          | Database name               | Yes      | -           |
+| `DB_PASSWORD`      | Database password           | Yes      | -           |
 
 ### Smart Contract Integration
 
@@ -165,15 +251,37 @@ The backend automatically connects to your deployed smart contracts using:
 
 ### Using REST Client
 
-Use the included `test.rest` file with VS Code REST Client extension:
+Use the included `test.rest` file with VS Code REST Client extension. The file contains comprehensive examples for all endpoints:
 
 ```http
-# Example: Set Plot Registry Contract
-POST http://localhost:8000/api/setter/set-plot-registry
+# Example: Create Block Parcel Token
+POST http://localhost:8000/api/setter/create-token
 Content-Type: application/json
 
 {
-  "plotRegistryAddress": "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
+  "blockInfo": "Block A1",
+  "parcelInfo": "Parcel 3",
+  "tokenURI": "https://example.com/metadata/token5",
+  "totalSupply": 1000
+}
+
+# Example: Initiate Plot
+POST http://localhost:8000/api/setter/plot-initiate
+Content-Type: application/json
+
+{
+  "plotName": "Plot 1",
+  "parcelIds": [1, 2],
+  "parcelAmounts": [100, 100]
+}
+
+# Example: Request Plot Transfer
+POST http://localhost:8000/api/setter/request-plot-transfer
+Content-Type: application/json
+
+{
+  "plotId": 1,
+  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
 }
 ```
 
@@ -183,13 +291,25 @@ Content-Type: application/json
 # Test server health
 curl http://localhost:8000
 
-# Test getter endpoint
-curl http://localhost:8000/api/getter/contract-info
+# Test database connection
+curl http://localhost:8000/api/db/test-connection
 
-# Test with POST data
+# Get all plots
+curl http://localhost:8000/api/getter/plots
+
+# Get land information
+curl http://localhost:8000/api/getter/land/1
+
+# Get plot information
+curl http://localhost:8000/api/getter/plot/1/info
+
+# Create token
 curl -X POST http://localhost:8000/api/setter/create-token \
   -H "Content-Type: application/json" \
-  -d '{"blockInfo":"Block123","parcelInfo":"Parcel456","tokenURI":"ipfs://...","totalSupply":"1000"}'
+  -d '{"blockInfo":"Block A1","parcelInfo":"Parcel 3","tokenURI":"https://example.com/metadata/token5","totalSupply":1000}'
+
+# View database table
+curl http://localhost:8000/api/db-management/show-table/blockparcelinfo
 ```
 
 ## 🔐 Security Considerations
@@ -197,8 +317,9 @@ curl -X POST http://localhost:8000/api/setter/create-token \
 ### Environment Variables
 
 - ⚠️ **Never commit `.env` file to version control**
-- 🔒 Use environment-specific private keys
-- 🛡️ Rotate private keys regularly in production
+- 🔒 Use environment-specific private keys and database credentials
+- 🛡️ Rotate private keys and database passwords regularly in production
+- 🗄️ Use secure database connections (SSL) in production
 
 ### CORS Configuration
 
@@ -278,10 +399,17 @@ server {
 
 ## 🔍 Monitoring & Logging
 
-### Health Check Endpoint
+### Health Check Endpoints
 
 ```bash
+# API Health Check
 curl http://localhost:8000/
+
+# Database Connection Check
+curl http://localhost:8000/api/db/test-connection
+
+# Swagger API Documentation
+curl http://localhost:8000/api-docs
 ```
 
 ### Error Handling
@@ -290,17 +418,21 @@ The server includes comprehensive error handling for:
 
 - Blockchain connection issues
 - Contract call failures
+- Database connectivity issues
 - Invalid request parameters
 - Network timeouts
+- Multi-signature approval validation
 
 ### Logs
 
 Monitor application logs for:
 
 - Server startup messages
-- Contract initialization status
-- Transaction receipts
-- Error details
+- Contract initialization status  
+- Database connection status
+- Transaction receipts and gas usage
+- Transfer request approvals
+- Error details with timestamps
 
 ## 🤝 Contributing
 
@@ -311,11 +443,13 @@ Monitor application logs for:
 
 ### Adding New Endpoints
 
-1. **Create route handler** in appropriate routes file
-2. **Add validation** for request parameters
-3. **Handle async operations** with proper error catching
-4. **Test thoroughly** with various inputs
-5. **Update documentation**
+1. **Choose appropriate route file** (`getter.routes.js` for read operations, `setter.routes.js` for blockchain writes, `db-management.routes.js` for database operations)
+2. **Add Swagger documentation** using JSDoc comments for API documentation
+3. **Add validation** for request parameters (especially Ethereum addresses and numeric values)
+4. **Handle async operations** with proper error catching and transaction receipts
+5. **Update database operations** if the endpoint interacts with persistent data
+6. **Test thoroughly** with various inputs using the `test.rest` file
+7. **Update this README** with new endpoint information
 
 ## 📚 API Response Format
 
@@ -346,11 +480,16 @@ Monitor application logs for:
 {
   "success": true,
   "data": {
-    "transactionHash": "0x...",
-    "blockNumber": 12345,
-    "gasUsed": "21000",
-    "status": "success"
-  }
+    "requestId": "1",
+    "plotId": 1,
+    "transaction": {
+      "hash": "0x1234567890abcdef...",
+      "gasUsed": "84523",
+      "status": 1
+    },
+    "confirmedAt": "2023-12-07T10:30:45.123Z"
+  },
+  "message": "Plot transfer request created successfully"
 }
 ```
 
@@ -359,26 +498,34 @@ Monitor application logs for:
 ### Common Issues
 
 1. **Contract Connection Failed**
-
-   - Verify RPC_URL is accessible
-   - Check CONTRACT_ADDRESS is correct
+   - Verify RPC_URL is accessible and network is up
+   - Check CONTRACT_ADDRESS is correct and deployed
    - Ensure network matches deployed contract
+   - Verify PRIVATE_KEY format (64-character hex without 0x prefix)
 
-2. **Transaction Failures**
+2. **Database Connection Failed**
+   - Verify DB_HOST, DB_USER, DB_NAME, DB_PASSWORD are correct
+   - Check if PostgreSQL service is running
+   - Ensure database exists and user has proper permissions
+   - Verify network connectivity to database host
 
-   - Verify PRIVATE_KEY has sufficient balance
-   - Check gas limit settings
-   - Confirm contract function exists
+3. **Transaction Failures**
+   - Verify PRIVATE_KEY wallet has sufficient balance for gas fees
+   - Check if contract function exists and is spelled correctly
+   - Ensure correct parameter types are passed
+   - Verify signer has required permissions for the function
 
-3. **Permission Denied**
+4. **Transfer Approval Issues**
+   - Check if request ID exists in database
+   - Verify signer wallet has the correct role (1=Land Authority, 2=Bank, 3=Lawyer)
+   - Ensure transfer request hasn't already been fully approved
+   - Check if plot/parcel exists and has valid ownership
 
-   - Ensure signer has required role for function
-   - Check contract access control settings
-
-4. **Server Won't Start**
-   - Verify all environment variables are set
-   - Check port availability
-   - Review dependency installation
+5. **Server Won't Start**
+   - Verify all required environment variables are set
+   - Check if port 8000 is available
+   - Review dependency installation with `npm install`
+   - Check PostgreSQL connection parameters
 
 ### Debug Mode
 

@@ -1,8 +1,6 @@
 # API Endpoint Usage Guide
 
-# BASE URL :
-
-
+# BASE URL: https://landmanagemnet-backendv2.onrender.com
 
 # Index of API Endpoints
 
@@ -140,13 +138,22 @@ Content-Type: application/json
 **Why/When:** Use this to request the transfer of an entire plot from one address to another. Used by plot owners or authorized users to initiate a transfer.
 
 ```
+
+```
+
 POST https://landmanagemnet-backendv2.onrender.com/api/setter/request-plot-transfer
 Content-Type: application/json
 
 {
-  "plotId": "1",
-  "to": "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
+"requestId": "REQ001",
+"fromAddress": "0x1234567890123456789012345678901234567890",
+"toAddress": "0x0987654321098765432109876543210987654321",
+"plotId": 1,
+"reason": "Sale transaction"
 }
+
+```
+
 ```
 
 **Conditions & Restrictions:**
@@ -277,6 +284,7 @@ POST https://landmanagemnet-backendv2.onrender.com/api/setter/plot-initiate
 Content-Type: application/json
 
 {
+  "plotName": "Agricultural Plot A1",
   "parcelIds": [101, 102, 103],
   "parcelAmounts": [1000, 800, 1200]
 }
@@ -294,6 +302,7 @@ Content-Type: application/json
       "status": 1
     },
     "plotId": "1",
+    "plotName": "Agricultural Plot A1",
     "parcelIds": [101, 102, 103],
     "parcelAmounts": [1000, 800, 1200]
   },
@@ -616,6 +625,223 @@ All endpoints return errors in a consistent format:
   }
 }
 ```
+
+---
+
+# Database Management Endpoints
+
+---
+
+## 12. View Database Table Data
+
+**Why/When:** View all data from any database table. Useful for debugging and data inspection.
+
+```
+GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/blockparcelinfo
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Data retrieved from 'blockparcelinfo' successfully",
+  "data": [
+    {
+      "id": 1,
+      "token_id": 1,
+      "parcel_name": "Parcel 3",
+      "block_name": "Block A1",
+      "total_supply": "1000",
+      "metadata": "https://example.com/metadata/token5"
+    }
+  ]
+}
+```
+
+---
+
+## 13. Create Database Table
+
+**Why/When:** Create a new database table with custom schema. Useful for setting up new data structures.
+
+```
+POST https://landmanagemnet-backendv2.onrender.com/api/db-management/create-table/users
+Content-Type: application/json
+
+{
+  "columns": "id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, email VARCHAR(100) UNIQUE, password VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Table 'users' created successfully",
+  "data": {
+    "tableName": "users",
+    "columns": "id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, email VARCHAR(100) UNIQUE, password VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+  }
+}
+```
+
+---
+
+## 14. Test Database Insertion
+
+**Why/When:** Insert test data into any database table. Useful for testing database operations.
+
+```
+POST https://landmanagemnet-backendv2.onrender.com/api/db-management/test-insertion/users
+Content-Type: application/json
+
+{
+  "columns": ["username", "email", "password"],
+  "values": ["john_doe", "john@example4.com", "password123"]
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Data inserted into 'users' successfully",
+  "data": {
+    "id": 1,
+    "username": "john_doe", 
+    "email": "john@example4.com",
+    "password": "password123",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 15. Drop Database Table
+
+**Why/When:** Delete entire database table. Use with caution - this permanently removes all data.
+
+```
+DELETE https://landmanagemnet-backendv2.onrender.com/api/db-management/table/users
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Table 'users' dropped successfully"
+}
+```
+
+---
+
+# Administrative Endpoints
+
+---
+
+## 16. Delete Block Parcel Record
+
+**Why/When:** Remove a specific block parcel record from the database. Administrative function.
+
+```
+DELETE https://landmanagemnet-backendv2.onrender.com/api/admin/block-parcel/1
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Block parcel record deleted successfully"
+}
+```
+
+---
+
+# Health Check Endpoints
+
+---
+
+## 17. Test Database Connection
+
+**Why/When:** Check if the database connection is working properly. Useful for health monitoring.
+
+```
+GET https://landmanagemnet-backendv2.onrender.com/api/db/test-connection
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Database connection successful",
+  "data": {
+    "status": "connected",
+    "timestamp": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 18. API Health Check
+
+**Why/When:** Basic health check to verify the API is running.
+
+```
+GET https://landmanagemnet-backendv2.onrender.com/
+Content-Type: application/json
+```
+
+**Response:**
+
+```
+It's Land Management Api endpoint
+```
+
+---
+
+## 19. API Documentation (Swagger UI)
+
+**Why/When:** Access interactive API documentation.
+
+```
+GET https://landmanagemnet-backendv2.onrender.com/api-docs
+Content-Type: text/html
+```
+
+**Returns:** Interactive Swagger UI documentation interface
+
+---
+
+# Complete Endpoint Summary
+
+## Total Endpoints: 19
+
+### By Category:
+- **Setter Endpoints (Blockchain Writes):** 5
+- **Getter Endpoints (Blockchain Reads):** 6  
+- **Plot Query Endpoints:** 5
+- **Database Management:** 4
+- **Administrative:** 1
+- **Health Check:** 3
+
+### By HTTP Method:
+- **GET:** 11 endpoints
+- **POST:** 6 endpoints
+- **DELETE:** 2 endpoints
+
+---
 
 # Authentication Notes
 
