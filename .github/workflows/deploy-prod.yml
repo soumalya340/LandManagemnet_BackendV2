@@ -31,6 +31,8 @@ jobs:
           docker push $GITHUB_REF_IMAGE
           docker push $GITHUB_BRANCH_IMAGE
 
+          echo "Docker Image Name: $GITHUB_BRANCH_IMAGE"
+
   deploy:
     runs-on: ubuntu-latest
     needs: build_push
