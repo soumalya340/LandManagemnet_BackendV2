@@ -30,7 +30,6 @@ jobs:
           echo "Pushing Image to GitHub Container Registry"
           docker push $GITHUB_REF_IMAGE
           docker push $GITHUB_BRANCH_IMAGE
-
           echo "Docker Image Name: $GITHUB_BRANCH_IMAGE"
 
   deploy:
@@ -49,7 +48,7 @@ jobs:
             cd land-tokenization
             docker stop land-tokenization || true
             docker rm land-tokenization || true
-            docker image rm ghcr.io/soumalya340/land-tokenization:main || true
+            docker image rm ghcr.io/soumalya340/landmanagemnet_backendv2:main || true
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-            docker pull ghcr.io/soumalya340/land-tokenization:main
-            docker run --restart=on-failure:14 --dns=1.1.1.1 --name="land-tokenization" --env-file=.env -p 3000:3000 -d ghcr.io/soumalya340/land-tokenization:main
+            docker pull ghcr.io/soumalya340/landmanagemnet_backendv2:main
+            docker run --restart=on-failure:14 --dns=1.1.1.1 --name="land-tokenization" --env-file=.env -p 3000:3000 -d ghcr.io/soumalya340/landmanagemnet_backendv2:main
