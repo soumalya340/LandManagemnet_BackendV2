@@ -1,11 +1,7 @@
 ## Test Database Connection
 GET https://landmanagemnet-backendv2.onrender.com/api/db/test-connection
 
-### Delete Block Parcel
-DELETE https://landmanagemnet-backendv2.onrender.com/api/admin/block-parcel/1
 
-### Drop Table
-DELETE https://landmanagemnet-backendv2.onrender.com/api/admin/table/blockparcelinfo
 
 ## Approve and Execute
 
@@ -68,7 +64,7 @@ Content-Type: application/json
 
 {
   "blockInfo": "Block A1",
-  "parcelInfo": "Parcel 3",
+  "parcelInfo": "Parcel 5",
   "tokenURI": "https://example.com/metadata/token5",
   "totalSupply": 1000
 }
@@ -87,16 +83,21 @@ POST http://localhost:8000/api/setter/plot-initiate
 Content-Type: application/json
 
 {
-  "plotName": "Plot 1",
-  "parcelIds": [1, 2],
+  "plotName": "Plot6",
+  "parcelIds": [4,5],
   "parcelAmounts": [100, 100]
 }
 
 ### GET PLOTS TABLE
 GET http://localhost:8000/api/db-management/show-table/plots
 
-### GET PLOTS TABLE Using Render
-GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/plots
+
+
+### GET PLOT BY NAME (Local)
+GET http://localhost:8000/api/db-management/plot/Plot6
+
+### GET PLOT BY NAME (Render)
+GET https://landmanagemnet-backendv2.onrender.com/api/db-management/plot/Plot 4
 
 
 ### TRANSFER OPERATIONS

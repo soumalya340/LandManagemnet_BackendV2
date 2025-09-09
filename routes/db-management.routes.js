@@ -138,6 +138,51 @@ router.get("/show-table/:tableName", async (req, res) => {
   }
 });
 
+// Get plot details by plot name
+router.get("/plot/:plotName", async (req, res) => {
+  try {
+    const { plotName } = req.params;
+
+    if (!plotName) {
+      return res.status(400).json({
+        success: false,
+        message: "Plot name is required",
+      });
+    }
+
+    // Query to get plot details by plot name
+    const query = `SELECT * FROM plots WHERE plot_name = $1`;
+    
+    const client = await db.connect();
+    try {
+      const result = await client.query(query, [plotName]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `Plot '${plotName}' not found`,
+          data: null
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: `Plot details retrieved successfully`,
+        data: result.rows[0]
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error retrieving plot details:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
 // Test route for dynamic table insertion
 router.post("/test-insertion/:tableName", async (req, res) => {
   try {
