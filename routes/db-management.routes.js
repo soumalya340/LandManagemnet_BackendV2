@@ -108,14 +108,14 @@ router.get("/show-table/:tableName", async (req, res) => {
         SELECT FROM information_schema.tables 
         WHERE table_name = $1
       )`;
-    
+
     const tableExists = await db.query(tableExistsQuery, [tableName]);
-    
+
     if (!tableExists.rows[0].exists) {
       return res.status(404).json({
         success: false,
         message: `Table '${tableName}' does not exist`,
-        data: []
+        data: [],
       });
     }
 
@@ -124,16 +124,16 @@ router.get("/show-table/:tableName", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: result.message || `Data retrieved from '${tableName}' successfully`,
-      data: result.data || []
+      message:
+        result.message || `Data retrieved from '${tableName}' successfully`,
+      data: result.data || [],
     });
-
   } catch (error) {
     console.error("Error showing table data:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -152,23 +152,23 @@ router.get("/plot/:plotName", async (req, res) => {
 
     // Query to get plot details by plot name
     const query = `SELECT * FROM plots WHERE plot_name = $1`;
-    
+
     const client = await db.connect();
     try {
       const result = await client.query(query, [plotName]);
-      
+
       if (result.rows.length === 0) {
         return res.status(404).json({
           success: false,
           message: `Plot '${plotName}' not found`,
-          data: null
+          data: null,
         });
       }
 
       res.status(200).json({
         success: true,
         message: `Plot details retrieved successfully`,
-        data: result.rows[0]
+        data: result.rows[0],
       });
     } finally {
       client.release();
@@ -182,6 +182,53 @@ router.get("/plot/:plotName", async (req, res) => {
     });
   }
 });
+
+// Get block parcel details by block name and parcel name
+router.get("/blockparcel/:blockName/:parcelName", async (req, res) => {
+  try {
+    const { blockName, parcelName } = req.params;
+
+    if (!blockName || !parcelName) {
+      return res.status(400).json({
+        success: false,
+        message: "Both block name and parcel name are required",
+      });
+    }
+
+    // Query to get block parcel details by block name and parcel name
+    const query = `SELECT * FROM blockparcelinfo WHERE block_name = $1 AND parcel_name = $2`;
+
+    const client = await db.connect();
+    try {
+      const result = await client.query(query, [blockName, parcelName]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `Block '${blockName}' with parcel '${parcelName}' not found`,
+          data: null,
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: `Block parcel details retrieved successfully`,
+        data: result.rows[0],
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error retrieving block parcel details:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
+
 
 // Test route for dynamic table insertion
 router.post("/test-insertion/:tableName", async (req, res) => {

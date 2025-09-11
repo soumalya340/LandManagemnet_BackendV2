@@ -1,6 +1,6 @@
 # API Endpoint Usage Guide
 
-# BASE URL: https://landmanagemnet-backendv2.onrender.com
+# BASE URL: http://99.81.54.249:3000/
 
 # Index of API Endpoints
 
@@ -87,6 +87,18 @@
     - `/api/get_plot/plot/{plotId}/user/{userAddress}/ownership`
     - Get user's ownership percentage in plot
 
+12. Get Database Table Data
+    - `/api/db-management/show-table/{tableName}`
+    - View all data from any database table
+
+13. Get Plot by Name
+    - `/api/db-management/plot/{plotName}`
+    - Get plot details by plot name from database
+
+14. Get Specific Block and Parcel by Name
+    - `/api/db-management/blockparcel/{blockName}/{parcelName}`
+    - Get specific block and parcel details by names
+
 ---
 
 # POST Endpoints Usage Guide
@@ -98,7 +110,7 @@
 **Why/When:** Use this to create a new land token with block and parcel information. Typically used by admin or authorized users to mint new tokens.
 
 ```
-POST https://landmanagemnet-backendv2.onrender.com/api/setter/create-token
+POST http://99.81.54.249:3000/api/setter/create-token
 Content-Type: application/json
 
 {
@@ -141,7 +153,7 @@ Content-Type: application/json
 
 ```
 
-POST https://landmanagemnet-backendv2.onrender.com/api/setter/request-plot-transfer
+POST http://99.81.54.249:3000/api/setter/request-plot-transfer
 Content-Type: application/json
 
 {
@@ -190,7 +202,7 @@ Content-Type: application/json
 **Why/When:** Use this to request the transfer of a parcel (or parcels) from one address to another inside a plot. Used by parcel owners or authorized users.
 
 ```
-POST https://landmanagemnet-backendv2.onrender.com/api/setter/request-parcel-transfer
+POST http://99.81.54.249:3000/api/setter/request-parcel-transfer
 Content-Type: application/json
 
 {
@@ -236,7 +248,7 @@ Content-Type: application/json
 - Lawyer Authority = 3
 
 ```
-POST https://landmanagemnet-backendv2.onrender.com/api/setter/approve-transfer-execution
+POST http://99.81.54.249:3000/api/setter/approve-transfer-execution
 Content-Type: application/json
 
 {
@@ -280,7 +292,7 @@ Content-Type: application/json
 **Why/When:** Use this to initiate a new plot with the given parcel IDs and parcel amounts. Used by admin or authorized users during plot creation.
 
 ```
-POST https://landmanagemnet-backendv2.onrender.com/api/setter/plot-initiate
+POST http://99.81.54.249:3000/api/setter/plot-initiate
 Content-Type: application/json
 
 {
@@ -321,7 +333,7 @@ Content-Type: application/json
 **Why/When:** Get detailed information about a specific land token by its ID. Use this to display land details to users.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/getter/land/1
+GET http://99.81.54.249:3000/api/getter/land/1
 Content-Type: application/json
 ```
 
@@ -349,7 +361,7 @@ Content-Type: application/json
 **Why/When:** Retrieve detailed information about a specific plot account by its ID. Useful for showing plot composition and ownership.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/getter/plot/1/info
+GET http://99.81.54.249:3000/api/getter/plot/1/info
 Content-Type: application/json
 ```
 
@@ -375,7 +387,7 @@ Content-Type: application/json
 **Why/When:** Get a list of all plots in the system. Use this to display available plots or for admin overviews.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/getter/plots
+GET http://99.81.54.249:3000/api/getter/plots
 Content-Type: application/json
 ```
 
@@ -399,7 +411,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the token URI for a specific land token. Use this to fetch metadata or images for a token.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/getter/token/1/uri
+GET http://99.81.54.249:3000/api/getter/token/1/uri
 Content-Type: application/json
 ```
 
@@ -423,7 +435,7 @@ Content-Type: application/json
 **Why/When:** Check the status of a transfer request by its ID. Only the sender of the request can access its status. Use for tracking transfer progress.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/getter/transfer/1/status
+GET http://99.81.54.249:3000/api/getter/transfer/1/status
 Content-Type: application/json
 ```
 
@@ -458,7 +470,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the current plot ID and token ID from the contract. Useful for admin or for creating new records.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/getter/plot-and-token-id-info
+GET http://99.81.54.249:3000/api/getter/plot-and-token-id-info
 Content-Type: application/json
 ```
 
@@ -482,7 +494,7 @@ Content-Type: application/json
 **Why/When:** Get all shareholders for a specific parcel within a plot. Use this to display ownership breakdown for a parcel.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/parcel/101/shareholders
+GET http://99.81.54.249:3000/api/get_plot/plot/1/parcel/101/shareholders
 Content-Type: application/json
 ```
 
@@ -511,7 +523,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the number of shares a specific user owns in a plot parcel. Use for user dashboards or ownership checks.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/parcel/101/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/shares
+GET http://99.81.54.249:3000/api/get_plot/plot/1/parcel/101/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/shares
 Content-Type: application/json
 ```
 
@@ -537,7 +549,7 @@ Content-Type: application/json
 **Why/When:** Get the total number of shares for a specific parcel within a plot. Useful for calculating ownership percentages.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/parcel/101/total-shares
+GET http://99.81.54.249:3000/api/get_plot/plot/1/parcel/101/total-shares
 Content-Type: application/json
 ```
 
@@ -562,7 +574,7 @@ Content-Type: application/json
 **Why/When:** Get all parcels that a specific user owns shares in within a plot. Use for user dashboards or ownership overviews.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/parcels
+GET http://99.81.54.249:3000/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/parcels
 Content-Type: application/json
 ```
 
@@ -588,7 +600,7 @@ Content-Type: application/json
 **Why/When:** Retrieve the ownership percentage of a specific user in a plot. The percentage is calculated based on the user's total shares compared to the plot's total shares.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/ownership
+GET http://99.81.54.249:3000/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/ownership
 Content-Type: application/json
 ```
 
@@ -637,7 +649,7 @@ All endpoints return errors in a consistent format:
 **Why/When:** View all data from any database table. Useful for debugging and data inspection.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/blockparcelinfo
+GET http://99.81.54.249:3000/api/db-management/show-table/blockparcelinfo
 Content-Type: application/json
 ```
 
@@ -662,12 +674,68 @@ Content-Type: application/json
 
 ---
 
-## 13. Create Database Table
+## 13. Get Plot by Name (Database)
+
+**Why/When:** Get plot details by plot name from the local database. Useful for searching plots by name.
+
+```
+GET http://99.81.54.249:3000/api/db-management/plot/Plot7
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Plot details retrieved successfully",
+  "data": {
+    "id": 1,
+    "plot_name": "Plot7",
+    "parcel_ids": [4, 5],
+    "parcel_amounts": [100, 100],
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 14. Get Specific Block and Parcel by Name
+
+**Why/When:** Get specific block and parcel details by their names from the database. Useful for searching specific block-parcel combinations.
+
+```
+GET http://99.81.54.249:3000/api/db-management/blockparcel/Block A1/Parcel 5
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Block parcel details retrieved successfully",
+  "data": {
+    "id": 1,
+    "token_id": 1,
+    "block_name": "Block A1",
+    "parcel_name": "Parcel 5",
+    "total_supply": "1000",
+    "metadata": "https://example.com/metadata/token5",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 15. Create Database Table
 
 **Why/When:** Create a new database table with custom schema. Useful for setting up new data structures.
 
 ```
-POST https://landmanagemnet-backendv2.onrender.com/api/db-management/create-table/users
+POST http://99.81.54.249:3000/api/db-management/create-table/users
 Content-Type: application/json
 
 {
@@ -690,12 +758,12 @@ Content-Type: application/json
 
 ---
 
-## 14. Test Database Insertion
+## 16. Test Database Insertion
 
 **Why/When:** Insert test data into any database table. Useful for testing database operations.
 
 ```
-POST https://landmanagemnet-backendv2.onrender.com/api/db-management/test-insertion/users
+POST http://99.81.54.249:3000/api/db-management/test-insertion/users
 Content-Type: application/json
 
 {
@@ -712,7 +780,7 @@ Content-Type: application/json
   "message": "Data inserted into 'users' successfully",
   "data": {
     "id": 1,
-    "username": "john_doe", 
+    "username": "john_doe",
     "email": "john@example4.com",
     "password": "password123",
     "created_at": "2024-01-15T10:30:00.000Z"
@@ -722,12 +790,12 @@ Content-Type: application/json
 
 ---
 
-## 15. Drop Database Table
+## 17. Drop Database Table
 
 **Why/When:** Delete entire database table. Use with caution - this permanently removes all data.
 
 ```
-DELETE https://landmanagemnet-backendv2.onrender.com/api/db-management/table/users
+DELETE http://99.81.54.249:3000/api/db-management/table/users
 Content-Type: application/json
 ```
 
@@ -746,12 +814,12 @@ Content-Type: application/json
 
 ---
 
-## 16. Delete Block Parcel Record
+## 18. Delete Block Parcel Record
 
 **Why/When:** Remove a specific block parcel record from the database. Administrative function.
 
 ```
-DELETE https://landmanagemnet-backendv2.onrender.com/api/admin/block-parcel/1
+DELETE http://99.81.54.249:3000/api/admin/block-parcel/1
 Content-Type: application/json
 ```
 
@@ -770,12 +838,12 @@ Content-Type: application/json
 
 ---
 
-## 17. Test Database Connection
+## 19. Test Database Connection
 
 **Why/When:** Check if the database connection is working properly. Useful for health monitoring.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api/db/test-connection
+GET http://99.81.54.249:3000/api/db/test-connection
 Content-Type: application/json
 ```
 
@@ -794,12 +862,12 @@ Content-Type: application/json
 
 ---
 
-## 18. API Health Check
+## 20. API Health Check
 
 **Why/When:** Basic health check to verify the API is running.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/
+GET http://99.81.54.249:3000/
 Content-Type: application/json
 ```
 
@@ -811,12 +879,12 @@ It's Land Management Api endpoint
 
 ---
 
-## 19. API Documentation (Swagger UI)
+## 21. API Documentation (Swagger UI)
 
 **Why/When:** Access interactive API documentation.
 
 ```
-GET https://landmanagemnet-backendv2.onrender.com/api-docs
+GET http://99.81.54.249:3000/api-docs
 Content-Type: text/html
 ```
 
@@ -826,18 +894,20 @@ Content-Type: text/html
 
 # Complete Endpoint Summary
 
-## Total Endpoints: 19
+## Total Endpoints: 22
 
 ### By Category:
+
 - **Setter Endpoints (Blockchain Writes):** 5
-- **Getter Endpoints (Blockchain Reads):** 6  
+- **Getter Endpoints (Blockchain Reads):** 6
 - **Plot Query Endpoints:** 5
-- **Database Management:** 4
+- **Database Management:** 7
 - **Administrative:** 1
 - **Health Check:** 3
 
 ### By HTTP Method:
-- **GET:** 11 endpoints
+
+- **GET:** 14 endpoints
 - **POST:** 6 endpoints
 - **DELETE:** 2 endpoints
 

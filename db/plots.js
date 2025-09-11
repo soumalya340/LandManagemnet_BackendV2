@@ -59,7 +59,7 @@ async function insertPlot(data) {
     if (!tableExistsAfter.rows[0].exists) {
       const columns = `
         plot_id INTEGER PRIMARY KEY,
-        plot_name VARCHAR(255) NOT NULL,
+        plot_name VARCHAR(255) NOT NULL UNIQUE,
         current_holder VARCHAR(255) NOT NULL,
         list_of_parcels NUMERIC[] NOT NULL,
         amount NUMERIC[] NOT NULL,
@@ -116,6 +116,31 @@ async function insertPlot(data) {
   }
 }
 
+// Function to check if plot name exists
+async function checkPlotNameExists(plotName) {
+  let client;
+  
+  try {
+    client = await db.connect();
+    
+    const query = `
+      SELECT EXISTS (
+        SELECT 1 FROM plots 
+        WHERE plot_name = $1
+      )
+    `;
+    
+    const result = await client.query(query, [plotName]);
+    return result.rows[0].exists;
+  } catch (err) {
+    console.error("❌ Error checking plot name:", err.message);
+    throw err;
+  } finally {
+    if (client) client.release();
+  }
+}
+
 module.exports = {
   insertPlot,
+  checkPlotNameExists,
 };

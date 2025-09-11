@@ -1,23 +1,7 @@
-## Test Database Connection
-GET https://landmanagemnet-backendv2.onrender.com/api/db/test-connection
+//----------------- Database Management Operation   ------------------------------///
 
-
-
-## Approve and Execute
-
-### Approve
-POST https://landmanagemnet-backendv2.onrender.com/api/setter/approve-transfer-execution
-Content-Type: application/json
-
-{
-  "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
-  "requestId": "1",
-  "role": 1
-}
-
-## Database Management Operations
-### Create Table - Users
-POST https://landmanagemnet-backendv2.onrender.com/api/db-management/create-table/users
+### Create Table - Users to check database connection
+POST https://localhost:8000api/db-management/create-table/users
 Content-Type: application/json
 
 {
@@ -36,27 +20,12 @@ Content-Type: application/json
   "values": ["john_doe", "john@example4.com", "password123"]
 }
 
-### Test Insertion - Users (Another Record)
-POST http://localhost:8000/api/db-management/test-insertion/users
-Content-Type: application/json
-
-{
-  "columns": ["username", "email", "password"],
-  "values": ["jane_smith", "jane@example.com", "securepass456"]
-}
-
 ### Drop Table - Users
 DELETE http://localhost:8000/api/db-management/table/users
 
-### Drop Table - Plots
-DELETE http://localhost:8000/api/db-management/table/plots
-
-#### BLOCKC AND PARCEL OPERATIONS
-
-### DELETE BLOCK AND PARCEL TABLE
-DELETE http://localhost:8000/api/db-management/table/blockparcelinfo
 
 
+#### BLOCK AND PARCEL OPERATIONS
 
 ### Create Token
 POST http://localhost:8000/api/setter/create-token
@@ -72,18 +41,21 @@ Content-Type: application/json
 ### GET BLOCK AND PARCEL DATA
 GET http://localhost:8000/api/db-management/show-table/blockparcelinfo
 
-### ONRENDER FOR BLOCK AND PARCEL
-GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/blockparcelinfo
+### GET SPECIFIC BLOCK AND PARCEL BY NAME
+GET http://localhost:8000/api/db-management/blockparcel/Block A1/Parcel 5
+
+
+
+### DELETE BLOCK AND PARCEL TABLE -- DONT USE UNLESS VERY MUCH , USE WTIH CAUTION
+DELETE http://localhost:8000/api/db-management/table/blockparcelinfo
 
 ### PLOT OPERATIONS
-
-
 ### Create Plot
 POST http://localhost:8000/api/setter/plot-initiate
 Content-Type: application/json
 
 {
-  "plotName": "Plot6",
+  "plotName": "Plot8",
   "parcelIds": [4,5],
   "parcelAmounts": [100, 100]
 }
@@ -91,17 +63,14 @@ Content-Type: application/json
 ### GET PLOTS TABLE
 GET http://localhost:8000/api/db-management/show-table/plots
 
-
-
 ### GET PLOT BY NAME (Local)
-GET http://localhost:8000/api/db-management/plot/Plot6
+GET http://localhost:8000/api/db-management/plot/Plot7
 
-### GET PLOT BY NAME (Render)
-GET https://landmanagemnet-backendv2.onrender.com/api/db-management/plot/Plot 4
+### Drop Table - Plots -- DONT USE UNLESS VERY MUCH , USE WTIH CAUTION
+DELETE http://localhost:8000/api/db-management/table/plots
 
 
-### TRANSFER OPERATIONS
-
+//----------------- TRANSFER OPERATIONS  ------------------------------///
 ### Create Request Table
 POST http://localhost:8000/api/db-management/create-table/request
 Content-Type: application/json
@@ -119,24 +88,6 @@ Content-Type: application/json
   "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
 }
 
-### Request Plot Transfer (Plot ID 20)
-POST http://localhost:8000/api/setter/request-plot-transfer
-Content-Type: application/json
-
-{
-  "plotId": 20,
-  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
-}
-
-### Request Plot Transfer (Different Recipient)
-POST http://localhost:8000/api/setter/request-plot-transfer
-Content-Type: application/json
-
-{
-  "plotId": 2,
-  "to": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
-}
-
 ### Request Parcel Transfer (Within Plot 1)
 POST http://localhost:8000/api/setter/request-parcel-transfer
 Content-Type: application/json
@@ -148,57 +99,56 @@ Content-Type: application/json
   "_plotId": 1
 }
 
-### Request Parcel Transfer (Within Plot 20)
-POST http://localhost:8000/api/setter/request-parcel-transfer
-Content-Type: application/json
-
-{
-  "_parcelId": 1,
-  "parcelAmount": 75,
-  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD",
-  "_plotId": 20
-}
-
-### View Request Table
-GET http://localhost:8000/api/db-management/show-table/request
-
-
 ### Approve Transfer (Land Authority)
 POST http://localhost:8000/api/setter/approve-transfer-execution
 Content-Type: application/json
 
 {
   "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
-  "requestId": "1",
-  "role": 1
+  "requestId": "1", // REQUEST ID
+  "role": 1 // ROLE ID
 }
 
-### Approve Transfer (Bank)
-POST http://localhost:8000/api/setter/approve-transfer-execution
-Content-Type: application/json
-
-{
-  "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
-  "requestId": "14",
-  "role": 2
-}
-
-### Approve Transfer (Lawyer)
-POST http://localhost:8000/api/setter/approve-transfer-execution
-Content-Type: application/json
-
-{
-  "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
-  "requestId": "14",
-  "role": 3
-}
-
-### GET REQUEST DATA
+### View Request Table db operation
 GET http://localhost:8000/api/db-management/show-table/request
 
-### ONRENDER FOR REQUEST
-GET https://landmanagemnet-backendv2.onrender.com/api/db-management/show-table/request
 
-
-### DELETE THE REQUEST 
+### DELETE THE REQUEST -- DONT USE UNLESS VERY MUCH , USE WTIH CAUTION
 DELETE http://localhost:8000/api/db-management/table/request
+
+//----------------- GET PLOT OPERATIONS  ------------------------------///
+
+### Get Plot Parcel Shareholders
+GET http://localhost:8000/api/get_plot/plot/1/parcel/101/shareholders
+
+### Get User Shares in Plot Parcel
+GET http://localhost:8000/api/get_plot/plot/1/parcel/101/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/shares
+
+### Get Plot Parcel Total Shares
+GET http://localhost:8000/api/get_plot/plot/1/parcel/101/total-shares
+
+### Get User Parcels in Plot
+GET http://localhost:8000/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/parcels
+
+### Get User Ownership Percentage in Plot
+GET http://localhost:8000/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/ownership
+
+//----------------- GETTER OPERATIONS  ------------------------------///
+
+### Get Land Information by Token ID
+GET http://localhost:8000/api/getter/land/1
+
+### Get Plot Account Information
+GET http://localhost:8000/api/getter/plot/1/info
+
+### Get All Plots List
+GET http://localhost:8000/api/getter/plots
+
+### Get Token URI
+GET http://localhost:8000/api/getter/token/1/uri
+
+### Get Transfer Request Status
+GET http://localhost:8000/api/getter/transfer/1/status
+
+### Get Plot and Token ID Info
+GET http://localhost:8000/api/getter/plot-and-token-id-info

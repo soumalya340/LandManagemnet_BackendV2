@@ -4,7 +4,7 @@ const {
   getContract,
 } = require("../utils/contractInstance");
 const { insertBlockParcelInfo } = require("../db/blockparcel");
-const { insertPlot } = require("../db/plots");
+const { insertPlot, checkPlotNameExists } = require("../db/plots");
 const {
   insertRequest,
   checkRequestExists,
@@ -467,127 +467,6 @@ router.post("/approve-transfer-execution", async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/setter/plot-initiate:
- *   post:
- *     summary: Initiate a new Plot
- *     description: Initiates a new plot with the given parcel IDs and parcel amounts.
- *     tags: [Plot]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - parcelIds
- *               - parcelAmounts
- *             properties:
- *               parcelIds:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 example: [101, 102, 103]
- *                 description: Array of parcel IDs
- *               parcelAmounts:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 example: [1000, 800, 1200]
- *                 description: Array of parcel amounts (must match parcelIds length)
- *           example:
- *             parcelIds: [101, 102, 103]
- *             parcelAmounts: [1000, 800, 1200]
- *     responses:
- *       200:
- *         description: Plot initiated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     transaction:
- *                       type: object
- *                       properties:
- *                         hash:
- *                           type: string
- *                           example: "0x1234567890abcdef1234567890abcdef12345678"
- *                         gasUsed:
- *                           type: string
- *                           example: "21000"
- *                         status:
- *                           type: number
- *                           example: 1
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                 message:
- *                   type: string
- *                   example: "Plot initiated successfully"
- *       400:
- *         description: Bad request - invalid input
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/plot-initiate"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/setter/plot-initiate"
- */
 router.post("/plot-initiate", async (req, res) => {
   try {
     let contract;
@@ -615,6 +494,35 @@ router.post("/plot-initiate", async (req, res) => {
           details:
             "Please provide plotName (string), parcelIds and parcelAmounts (arrays of equal length).",
           code: "INVALID_INPUT",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/plot-initiate",
+        },
+      });
+    }
+
+    // Check if plot name already exists
+    try {
+      const plotExists = await checkPlotNameExists(plotName);
+      if (plotExists) {
+        return res.status(409).json({
+          success: false,
+          error: {
+            message: "Plot name already exists",
+            details: `A plot with the name '${plotName}' already exists. Please choose a different name.`,
+            code: "PLOT_NAME_EXISTS",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/plot-initiate",
+          },
+        });
+      }
+    } catch (checkError) {
+      console.error("Error checking plot name existence:", checkError.message);
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: "Failed to validate plot name",
+          details: checkError.message,
+          code: "VALIDATION_ERROR",
           timestamp: new Date().toISOString(),
           endpoint: "/api/setter/plot-initiate",
         },
