@@ -158,10 +158,6 @@
     - `/api/logs`
     - View all logged API calls and their details
 
-25. API Documentation (Swagger UI)
-    - `/api-docs`
-    - Access interactive API documentation
-
 ---
 
 # POST Endpoints Usage Guide
@@ -933,19 +929,6 @@ It's Land Management Api endpoint
 
 ---
 
-## 21. API Documentation (Swagger UI)
-
-**Why/When:** Access interactive API documentation.
-
-```
-GET http://localhost:8000/api-docs
-Content-Type: text/html
-```
-
-**Returns:** Interactive Swagger UI documentation interface
-
----
-
 ## 6. Get All Plots Information
 
 **Why/When:** Get comprehensive information about all plots in the blockchain with proper BigInt handling and consistent data formatting.
@@ -1193,7 +1176,7 @@ Content-Type: application/json
 
 # Complete Endpoint Summary
 
-## Total Endpoints: 25
+## Total Endpoints: 24
 
 ### By Category:
 
@@ -1202,19 +1185,12 @@ Content-Type: application/json
 - **Blockchain Get Calls - Plot:** 5
 - **Database Management:** 6
 - **Administrative:** 3
-- **Health Check & Utility:** 3
+- **Health Check & Utility:** 2
 
 ### By HTTP Method:
 
-- **GET:** 20 endpoints
+- **GET:** 19 endpoints
 - **POST:** 5 endpoints
 - **DELETE:** 3 endpoints
 
 ---
-
-# Authentication Notes
-
-- Most endpoints require proper authentication in production
-- The transfer status endpoint specifically requires that only the sender of the request can access its status
-- Delegate approval endpoints require specific role-based permissions
-- Consider implementing proper authentication middleware for production use
