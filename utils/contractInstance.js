@@ -4,7 +4,7 @@ const fs = require("fs");
 require("dotenv").config();
 
 // Contract configuration
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const CONTRACT_ADDRESS = "0x12b88B7C77B0D91eBd2034E434a14c02d9558779";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const RPC_URL =
   process.env.RPC_URL || "https://base-sepolia-rpc.publicnode.com";

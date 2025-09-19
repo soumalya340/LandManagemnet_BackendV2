@@ -3,89 +3,116 @@ const {
   initializeContract,
   getContract,
 } = require("../utils/contractInstance");
+const {
+  getAllLandInfo,
+  getAllPlotAccountInfo,
+  getAllTransferRequestInfo,
+} = require("../utils/info");
 const router = express.Router();
 
 /**
- * @swagger
- * /api/getter/land/{tokenId}:
- *   get:
- *     summary: Get Land Information
- *     description: Retrieves detailed information about a specific land token by its ID
- *     tags: [Land]
- *     parameters:
- *       - name: tokenId
- *         in: path
- *         required: true
- *         description: The ID of the land token
- *         schema:
- *           type: integer
- *           minimum: 1
- *           example: 1
- *     responses:
- *       200:
- *         description: Land information retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     tokenId:
- *                       type: string
- *                       example: "1"
- *                     blockInfo:
- *                       type: string
- *                       example: "Block A1"
- *                     parcelInfo:
- *                       type: string
- *                       example: "Parcel P1"
- *                     blockParcelTokenURI:
- *                       type: string
- *                       example: "https://example.com/token/1"
- *                     totalSupply:
- *                       type: string
- *                       example: "1000"
- *                     plotAllocation:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["100", "200", "300"]
- *                 message:
- *                   type: string
- *                   example: "Land information retrieved successfully"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/getter/endpoint"
+ * Get Latest Token and Plot ID Info
+ *
+ * Why/When: Retrieve the current plot ID and token ID from the contract.
+ * Useful for admin or for creating new records.
+ *
+ * Returns: Current plot ID and token ID counters from the smart contract
+ */
+router.get("/plot-and-token-id-info", async (req, res) => {
+  try {
+    let contract;
+    try {
+      contract = getContract();
+    } catch (error) {
+      await initializeContract();
+      contract = getContract();
+    }
+    console.log("The api is started fetching plot and token id info");
+    const [plotId, tokenId] = await contract.getCurrentPlotAndTokenIdInfo();
+    console.log("The api is finished fetching plot and token id info");
+    res.json({
+      success: true,
+      data: {
+        plotId: plotId.toString(),
+        tokenId: tokenId.toString(),
+      },
+      message: "Plot and token ID info retrieved successfully",
+    });
+  } catch (error) {
+    console.error(
+      "Error in /api/getter/plot-and-token-id-info:",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Failed to fetch plot and token ID info",
+        details: error.message,
+        code: error.code,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/getter/plot-and-token-id-info",
+      },
+    });
+  }
+});
+
+/**
+ * Get Token URI of a specific land token
+ *
+ * Why/When: Retrieve the token URI for a specific land token.
+ * Use this to fetch metadata or images for a token.
+ *
+ * Parameters:
+ * - tokenId: The ID of the token to get URI for
+ *
+ * Returns: Token metadata URI for the specified token
+ */
+router.get("/token/:tokenId/uri", async (req, res) => {
+  try {
+    let contract;
+    try {
+      contract = getContract();
+    } catch (error) {
+      await initializeContract();
+      contract = getContract();
+    }
+
+    const { tokenId } = req.params;
+    const uri = await contract.getBlockParcelTokenURI(tokenId);
+
+    res.json({
+      success: true,
+      data: {
+        tokenId,
+        uri,
+      },
+      message: "Token URI retrieved successfully",
+    });
+  } catch (error) {
+    console.error("Error in /api/token/:tokenId/uri:", error.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Failed to fetch token URI",
+        details: error.message,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/token/:tokenId/uri",
+      },
+    });
+  }
+});
+
+/**
+ * Get Land Information of a specific land token
+ *
+ * Why/When: Get detailed information about a specific land token by its ID.
+ * Use this to display land details to users.
+ *
+ * Parameters:
+ * - tokenId: The ID of the land token to retrieve information for
+ *
+ * Returns: Detailed land information including block info, parcel info,
+ * token URI, total supply, and plot allocations
  */
 router.get("/land/:tokenId", async (req, res) => {
   try {
@@ -127,75 +154,16 @@ router.get("/land/:tokenId", async (req, res) => {
 });
 
 /**
- * @swagger
- * /api/getter/plot/{plotId}/info:
- *   get:
- *     summary: Get Plot Account Information
- *     description: Retrieves detailed information about a specific plot account by its ID
- *     tags: [Plot]
- *     parameters:
- *       - $ref: '#/components/parameters/PlotId'
- *     responses:
- *       200:
- *         description: Plot account information retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     plotAccount:
- *                       type: string
- *                       example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                     parcelIds:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["101", "102", "103"]
- *                     parcelAmounts:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["1000", "800", "1200"]
- *                 message:
- *                   type: string
- *                   example: "Plot account information retrieved successfully"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/getter/endpoint"
+ * Get Plot Account Information of a specific plot
+ *
+ * Why/When: Retrieve detailed information about a specific plot account by its ID.
+ * Useful for showing plot composition and ownership.
+ *
+ * Parameters:
+ * - plotId: The ID of the plot to retrieve information for
+ *
+ * Returns: Plot account details including plot account address, parcel IDs,
+ * and parcel amounts
  */
 router.get("/plot/:plotId/info", async (req, res) => {
   try {
@@ -237,310 +205,19 @@ router.get("/plot/:plotId/info", async (req, res) => {
 });
 
 /**
- * @swagger
- * /api/getter/plots:
- *   get:
- *     summary: Get All Plots
- *     description: Retrieves a list of all plots in the system
- *     tags: [Plot]
- *     responses:
- *       200:
- *         description: List of all plots retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plots:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["1", "2", "3"]
- *                     totalPlots:
- *                       type: number
- *                       example: 3
- *                 message:
- *                   type: string
- *                   example: "List of all plots retrieved successfully"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/getter/endpoint"
- */
-router.get("/plots", async (req, res) => {
-  try {
-    let contract;
-    try {
-      contract = getContract();
-    } catch (error) {
-      await initializeContract();
-      contract = getContract();
-    }
-
-    const plots = await contract.getListOfTotalPlots();
-
-    res.json({
-      success: true,
-      data: {
-        plots,
-        totalPlots: plots.length,
-      },
-      message: "List of all plots retrieved successfully",
-    });
-  } catch (error) {
-    console.error("Error in /api/plots:", error.message);
-    res.status(500).json({
-      success: false,
-      error: {
-        message: "Failed to fetch plots list",
-        details: error.message,
-        timestamp: new Date().toISOString(),
-        endpoint: "/api/plots",
-      },
-    });
-  }
-});
-
-/**
- * @swagger
- * /api/getter/token/{tokenId}/uri:
- *   get:
- *     summary: Get Token URI
- *     description: Retrieves the token URI for a specific land token
- *     tags: [Token]
- *     parameters:
- *       - $ref: '#/components/parameters/TokenId'
- *     responses:
- *       200:
- *         description: Token URI retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     tokenId:
- *                       type: string
- *                       example: "1"
- *                     uri:
- *                       type: string
- *                       example: "https://example.com/token/1"
- *                 message:
- *                   type: string
- *                   example: "Token URI retrieved successfully"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/getter/endpoint"
- */
-router.get("/token/:tokenId/uri", async (req, res) => {
-  try {
-    let contract;
-    try {
-      contract = getContract();
-    } catch (error) {
-      await initializeContract();
-      contract = getContract();
-    }
-
-    const { tokenId } = req.params;
-    const uri = await contract.getBlockParcelTokenURI(tokenId);
-
-    res.json({
-      success: true,
-      data: {
-        tokenId,
-        uri,
-      },
-      message: "Token URI retrieved successfully",
-    });
-  } catch (error) {
-    console.error("Error in /api/token/:tokenId/uri:", error.message);
-    res.status(500).json({
-      success: false,
-      error: {
-        message: "Failed to fetch token URI",
-        details: error.message,
-        timestamp: new Date().toISOString(),
-        endpoint: "/api/token/:tokenId/uri",
-      },
-    });
-  }
-});
-
-/**
- * @swagger
- * /api/getter/transfer/{requestId}/status:
- *   get:
- *     summary: Get Transfer Request Status
- *     description: |
- *       Retrieves the status of a transfer request by its ID.
+ * Get Transfer Request Status of a specific request
  *
- *       ⚠️ **Important**: This endpoint has authentication requirements in the smart contract - only the sender of the request can access its status.
- *     tags: [Transfer]
- *     parameters:
- *       - name: requestId
- *         in: path
- *         required: true
- *         description: The ID of the transfer request
- *         schema:
- *           type: integer
- *           minimum: 1
- *           example: 1
- *     responses:
- *       200:
- *         description: Transfer request status retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     requestId:
- *                       type: string
- *                       example: "1"
- *                     from:
- *                       type: string
- *                       pattern: "^0x[a-fA-F0-9]{40}$"
- *                       example: "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0"
- *                     to:
- *                       type: string
- *                       pattern: "^0x[a-fA-F0-9]{40}$"
- *                       example: "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
- *                     parcelId:
- *                       type: string
- *                       example: "101"
- *                     parcelAmount:
- *                       type: string
- *                       example: "1000"
- *                     isPlotTransfer:
- *                       type: boolean
- *                       example: false
- *                     plotId:
- *                       type: string
- *                       example: "0"
- *                     timestamp:
- *                       type: string
- *                       example: "1642250000"
- *                     status:
- *                       type: number
- *                       example: 1
- *                     landAuthorityApproved:
- *                       type: boolean
- *                       example: true
- *                     lawyerApproved:
- *                       type: boolean
- *                       example: false
- *                     bankApproved:
- *                       type: boolean
- *                       example: false
- *                 message:
- *                   type: string
- *                   example: "Transfer request status retrieved successfully"
- *                 warning:
- *                   type: string
- *                   example: "This endpoint should have authentication in production"
- *       500:
- *         description: Internal server error or access denied
- *         content:
- *           application/json:
- *             schema:
- *               allOf:
- *                 - type: object
- *                   properties:
- *                     success:
- *                       type: boolean
- *                       example: false
- *                     error:
- *                       type: object
- *                       properties:
- *                         message:
- *                           type: string
- *                           example: "Operation failed"
- *                         details:
- *                           type: string
- *                           example: "Detailed error description"
- *                         code:
- *                           type: string
- *                           example: "CALL_EXCEPTION"
- *                         timestamp:
- *                           type: string
- *                           format: date-time
- *                         endpoint:
- *                           type: string
- *                           example: "/api/getter/endpoint"
- *                 - type: object
- *                   properties:
- *                     error:
- *                       type: object
- *                       properties:
- *                         note:
- *                           type: string
- *                           example: "This may fail if you're not the sender of the request"
+ * Why/When: Check the status of a transfer request by its ID.
+ * Only the sender of the request can access its status. Use for tracking transfer progress.
+ *
+ * Parameters:
+ * - requestId: The ID of the transfer request to check status for
+ *
+ * Security: Only the sender of the request can access its status.
+ * Implement proper authentication before using this in production.
+ *
+ * Returns: Transfer request details including from/to addresses, amounts,
+ * approvals, and current status
  */
 router.get("/transfer/:requestId/status", async (req, res) => {
   try {
@@ -593,95 +270,98 @@ router.get("/transfer/:requestId/status", async (req, res) => {
 });
 
 /**
- * @swagger
- * /api/getter/plot-and-token-id-info:
- *   get:
- *     summary: Get Plot and Token ID Info
- *     description: Retrieves the plot ID and token ID from the contract.
- *     tags: [Token]
- *     responses:
- *       200:
- *         description: Plot and token ID info retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     tokenId:
- *                       type: string
- *                       example: "1001"
- *                 message:
- *                   type: string
- *                   example: "Plot and token ID info retrieved successfully"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Operation failed"
- *                     details:
- *                       type: string
- *                       example: "Detailed error description"
- *                     code:
- *                       type: string
- *                       example: "CALL_EXCEPTION"
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     endpoint:
- *                       type: string
- *                       example: "/api/getter/plot-and-token-id-info"
+ * Get All Plots Information (Enhanced)
+ *
+ * Why/When: Get comprehensive information about all plots in the blockchain.
+ *
+ * Returns: All plot account information with proper BigInt handling and
+ * consistent data formatting including plot accounts, names, parcel IDs, and amounts
  */
-router.get("/plot-and-token-id-info", async (req, res) => {
+router.get("/all-plots-info", async (req, res) => {
   try {
-    let contract;
-    try {
-      contract = getContract();
-    } catch (error) {
-      await initializeContract();
-      contract = getContract();
+    const plotInfoJson = await getAllPlotAccountInfo();
+    const plotInfo = JSON.parse(plotInfoJson);
+
+    if (plotInfo.success) {
+      res.json(plotInfo);
+    } else {
+      res.status(500).json(plotInfo);
     }
-    const [plotId, tokenId] = await contract.getPlotAndTokenIdInfo();
-    res.json({
-      success: true,
-      data: {
-        plotId: plotId.toString(),
-        tokenId: tokenId.toString(),
-      },
-      message: "Plot and token ID info retrieved successfully",
-    });
   } catch (error) {
-    console.error(
-      "Error in /api/getter/plot-and-token-id-info:",
-      error.message
-    );
+    console.error("Error in /api/all-plots-info:", error.message);
     res.status(500).json({
       success: false,
       error: {
-        message: "Failed to fetch plot and token ID info",
+        message: "Failed to fetch plots list",
         details: error.message,
-        code: error.code,
         timestamp: new Date().toISOString(),
-        endpoint: "/api/getter/plot-and-token-id-info",
+        endpoint: "/api/all-plots-info",
+      },
+    });
+  }
+});
+
+/**
+ * Get All Land Information (Enhanced)
+ *
+ * Why/When: Get comprehensive information about all land tokens in the blockchain.
+ *
+ *
+ * Returns: All land information with proper BigInt handling including
+ * block info, parcel info, token URIs, supplies, and plot allocations
+ */
+router.get("/all-land-info", async (req, res) => {
+  try {
+    const landInfoJson = await getAllLandInfo();
+    const landInfo = JSON.parse(landInfoJson);
+
+    if (landInfo.success) {
+      res.json(landInfo);
+    } else {
+      res.status(500).json(landInfo);
+    }
+  } catch (error) {
+    console.error("Error in /api/all-land-info:", error.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Failed to fetch land information",
+        details: error.message,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/all-land-info",
+      },
+    });
+  }
+});
+
+/**
+ * Get All Transfer Requests (Enhanced)
+ *
+ * Why/When: Get comprehensive information about all transfer requests in the blockchain.
+ *
+ *
+ * Returns: All transfer request information with proper BigInt handling including
+ * from/to addresses, amounts, approvals, and status for all requests
+ */
+router.get("/all-transfer-requests", async (req, res) => {
+  try {
+    const requestInfoJson = await getAllTransferRequestInfo();
+    const requestInfo = JSON.parse(requestInfoJson);
+
+    if (requestInfo.success) {
+      res.json(requestInfo);
+    } else {
+      res.status(500).json(requestInfo);
+    }
+  } catch (error) {
+    console.error("Error in /api/all-transfer-requests:", error.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Failed to fetch transfer requests",
+        details: error.message,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/all-transfer-requests",
       },
     });
   }

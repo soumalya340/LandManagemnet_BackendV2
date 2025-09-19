@@ -3,6 +3,18 @@ const { Pool } = require("pg");
 const express = require("express");
 const router = express.Router();
 const { dropTable, createTable, showTableData } = require("../db/db_utils");
+const {
+  checkPlotTableExists,
+  syncPlotsWithBlockchain,
+} = require("../db/plots");
+const {
+  checkBlockParcelTableExists,
+  syncBlockParcelWithBlockchain,
+} = require("../db/blockparcel");
+const {
+  checkRequestTableExists,
+  syncRequestsWithBlockchain,
+} = require("../db/request");
 
 // PostgreSQL connection configuration
 const db = new Pool({
@@ -13,123 +25,73 @@ const db = new Pool({
   port: 5432,
 });
 
-// Drop entire table
-router.delete("/table/:tableName", async (req, res) => {
+/**
+ * Database Health Check
+ *
+ * Why/When: Check if the database connection is working properly.
+ * Useful for health monitoring and debugging database connectivity issues.
+ *
+ * Returns: Database connection status and health information
+ */
+router.get("/health", async (req, res) => {
   try {
-    const { tableName } = req.params;
-
-    if (!tableName) {
-      return res.status(400).json({
-        success: false,
-        message: "Table name is required",
+    const client = await db.connect();
+    try {
+      await client.query("SELECT 1");
+      res.status(200).json({
+        success: true,
+        message: "Database connection is healthy",
       });
+    } finally {
+      client.release();
     }
-
-    const result = await dropTable(tableName);
-
-    if (!result.success) {
-      return res.status(404).json({
-        success: false,
-        message: result.message,
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: result.message,
-    });
   } catch (error) {
-    console.error("Error dropping table:", error);
-    res.status(500).json({
+    console.error("Database connection error:", error);
+    res.status(503).json({
       success: false,
-      message: "Internal server error",
+      message: "Database connection failed",
       error: error.message,
     });
   }
 });
 
-// Create table with custom columns
-router.post("/create-table/:tableName", async (req, res) => {
+/**
+ * Show Plots Table Data
+ *
+ * Why/When: View all data from the plots table in the database.
+ * Useful for debugging and data inspection of plot records.
+ *
+ * Returns: All records from the plots table with proper formatting
+ */
+router.get("/show-plots", async (req, res) => {
   try {
-    const { tableName } = req.params;
-    const { columns } = req.body;
+    // Check if plots table exists and sync if needed
+    console.log("Checking if plots table exists...");
+    const tableExists = await checkPlotTableExists();
 
-    if (!tableName) {
-      return res.status(400).json({
-        success: false,
-        message: "Table name is required",
-      });
+    if (tableExists) {
+      console.log("Plots table exists");
+      // Check if table is empty and sync if needed
+      const result = await showTableData("plots");
+      if (!result.data || result.data.length === 0) {
+        console.log("Table is empty, syncing plots data with blockchain...");
+        await syncPlotsWithBlockchain();
+      }
+    } else {
+      console.log("Plots table does not exist");
+      console.log("Syncing plots data with blockchain...");
+      await syncPlotsWithBlockchain();
     }
 
-    if (!columns || typeof columns !== "string") {
-      return res.status(400).json({
-        success: false,
-        message: "Columns definition is required and must be a string",
-        example:
-          "id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-      });
-    }
-
-    await createTable(tableName, columns);
-
-    res.status(201).json({
-      success: true,
-      message: `Table '${tableName}' created successfully`,
-      data: {
-        tableName,
-        columns,
-      },
-    });
-  } catch (error) {
-    console.error("Error creating table:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-});
-
-// Route to show data from any table (generic showcase)
-router.get("/show-table/:tableName", async (req, res) => {
-  try {
-    const { tableName } = req.params;
-
-    if (!tableName) {
-      return res.status(400).json({
-        success: false,
-        message: "Table name is required",
-      });
-    }
-
-    // First check if table exists
-    const tableExistsQuery = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_name = $1
-      )`;
-
-    const tableExists = await db.query(tableExistsQuery, [tableName]);
-
-    if (!tableExists.rows[0].exists) {
-      return res.status(404).json({
-        success: false,
-        message: `Table '${tableName}' does not exist`,
-        data: [],
-      });
-    }
-
-    // If table exists, show its data
-    const result = await showTableData(tableName);
+    const result = await showTableData("plots");
 
     res.status(200).json({
       success: true,
-      message:
-        result.message || `Data retrieved from '${tableName}' successfully`,
+      message: result.message || "Plots data retrieved successfully",
       data: result.data || [],
     });
   } catch (error) {
-    console.error("Error showing table data:", error);
+    console.error("Error showing plots data:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -138,7 +100,107 @@ router.get("/show-table/:tableName", async (req, res) => {
   }
 });
 
-// Get plot details by plot name
+/**
+ * Show Block Parcel Table Data
+ *
+ * Why/When: View all data from the blockparcelinfo table in the database.
+ * Useful for debugging and data inspection of block parcel records.
+ *
+ * Returns: All records from the blockparcelinfo table with proper formatting
+ */
+router.get("/show-blockparcel", async (req, res) => {
+  try {
+    // Check if blockparcel table exists and sync if needed
+    console.log("Checking if blockparcel table exists...");
+    const tableExists = await checkBlockParcelTableExists();
+
+    if (tableExists) {
+      console.log("Blockparcel table exists");
+      // Check if table is empty and sync if needed
+      const result = await showTableData("blockparcelinfo");
+      if (!result.data || result.data.length === 0) {
+        console.log("Table is empty, syncing blockparcel data with blockchain...");
+        await syncBlockParcelWithBlockchain();
+      }
+    } else {
+      console.log("Blockparcel table does not exist");
+      console.log("Syncing blockparcel data with blockchain...");
+      await syncBlockParcelWithBlockchain();
+    }
+
+    const result = await showTableData("blockparcelinfo");
+
+    res.status(200).json({
+      success: true,
+      message: result.message || "Block parcel data retrieved successfully",
+      data: result.data || [],
+    });
+  } catch (error) {
+    console.error("Error showing block parcel data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * Show Request Table Data
+ *
+ * Why/When: View all data from the request table in the database.
+ * Useful for debugging and data inspection of transfer request records.
+ *
+ * Returns: All records from the request table with proper formatting
+ */
+router.get("/show-request", async (req, res) => {
+  try {
+    // Check if request table exists and sync if needed
+    console.log("Checking if request table exists...");
+    const tableExists = await checkRequestTableExists();
+
+    if (tableExists) {
+      console.log("Request table exists");
+      // Check if table is empty and sync if needed
+      const result = await showTableData("request");
+      if (!result.data || result.data.length === 0) {
+        console.log("Table is empty, syncing request data with blockchain...");
+        await syncRequestsWithBlockchain();
+      }
+    } else {
+      console.log("Request table does not exist");
+      console.log("Syncing request data with blockchain...");
+      await syncRequestsWithBlockchain();
+    }
+
+    const result = await showTableData("request");
+
+    res.status(200).json({
+      success: true,
+      message: result.message || "Request data retrieved successfully",
+      data: result.data || [],
+    });
+  } catch (error) {
+    console.error("Error showing request data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * Get Plot by Name (Database)
+ *
+ * Why/When: Get plot details by plot name from the local database.
+ * Useful for searching plots by name and retrieving plot information.
+ *
+ * Parameters:
+ * - plotName: The name of the plot to retrieve details for
+ *
+ * Returns: Plot details including plot name, parcel IDs, amounts, and creation timestamp
+ */
 router.get("/plot/:plotName", async (req, res) => {
   try {
     const { plotName } = req.params;
@@ -183,7 +245,18 @@ router.get("/plot/:plotName", async (req, res) => {
   }
 });
 
-// Get block parcel details by block name and parcel name
+/**
+ * Get Specific Block and Parcel by Name
+ *
+ * Why/When: Get specific block and parcel details by their names from the database.
+ * Useful for searching specific block-parcel combinations.
+ *
+ * Parameters:
+ * - blockName: The name of the block to search for
+ * - parcelName: The name of the parcel to search for
+ *
+ * Returns: Block parcel details including token ID, total supply, metadata, and creation timestamp
+ */
 router.get("/blockparcel/:blockName/:parcelName", async (req, res) => {
   try {
     const { blockName, parcelName } = req.params;
@@ -228,43 +301,103 @@ router.get("/blockparcel/:blockName/:parcelName", async (req, res) => {
   }
 });
 
-
-
-// Test route for dynamic table insertion
-router.post("/test-insertion/:tableName", async (req, res) => {
+/**
+ * Drop Plots Table
+ *
+ * Why/When: Delete the entire plots table from the database.
+ * Use with caution - this permanently removes all plot data.
+ *
+ * Security: This is a destructive operation that permanently deletes all plot records.
+ *
+ * Returns: Confirmation of table deletion
+ */
+router.delete("/table/plots", async (req, res) => {
   try {
-    const { tableName } = req.params;
-    const { columns, values } = req.body;
+    const result = await dropTable("plots");
 
-    if (!tableName || !columns || !values) {
-      return res.status(400).json({
+    if (!result.success) {
+      return res.status(404).json({
         success: false,
-        message: "Table name, columns, and values are required",
-        example: {
-          columns: ["name", "age", "email"],
-          values: ["John Doe", 25, "john@example.com"],
-        },
+        message: result.message,
       });
     }
 
-    // Create the INSERT query dynamically
-    const columnsList = columns.join(", ");
-    const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
-    const query = `INSERT INTO ${tableName} (${columnsList}) VALUES (${placeholders}) RETURNING *`;
-
-    const client = await db.connect();
-    try {
-      const result = await client.query(query, values);
-      res.status(201).json({
-        success: true,
-        message: `Data inserted into '${tableName}' successfully`,
-        data: result.rows[0],
-      });
-    } finally {
-      client.release();
-    }
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
   } catch (error) {
-    console.error("Error in test insertion:", error);
+    console.error("Error dropping plots table:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * Drop Request Table
+ *
+ * Why/When: Delete the entire request table from the database.
+ * Use with caution - this permanently removes all transfer request data.
+ *
+ * Security: This is a destructive operation that permanently deletes all request records.
+ *
+ * Returns: Confirmation of table deletion
+ */
+router.delete("/table/request", async (req, res) => {
+  try {
+    const result = await dropTable("request");
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    console.error("Error dropping request table:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * Drop Block Parcel Info Table
+ *
+ * Why/When: Delete the entire blockparcelinfo table from the database.
+ * Use with caution - this permanently removes all block parcel data.
+ *
+ * Security: This is a destructive operation that permanently deletes all block parcel records.
+ *
+ * Returns: Confirmation of table deletion
+ */
+router.delete("/table/blockparcelinfo", async (req, res) => {
+  try {
+    const result = await dropTable("blockparcelinfo");
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    console.error("Error dropping blockparcelinfo table:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

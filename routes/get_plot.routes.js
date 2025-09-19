@@ -5,6 +5,18 @@ const {
 } = require("../utils/contractInstance");
 const router = express.Router();
 
+/**
+ * Get Plot Parcel Shareholders
+ *
+ * Why/When: Get all shareholders for a specific parcel within a plot.
+ * Use this to display ownership breakdown for a parcel.
+ *
+ * Parameters:
+ * - plotId: The ID of the plot containing the parcel
+ * - parcelId: The ID of the parcel to get shareholders for
+ *
+ * Returns: List of all shareholder addresses for the specified parcel
+ */
 router.get("/plot/:plotId/parcel/:parcelId/shareholders", async (req, res) => {
   try {
     let contract;
@@ -48,6 +60,21 @@ router.get("/plot/:plotId/parcel/:parcelId/shareholders", async (req, res) => {
   }
 });
 
+/**
+ * Get User Shares in Plot Parcel
+ *
+ * Why/When: Retrieve the number of shares a specific user owns in a plot parcel.
+ * Use for user dashboards or ownership checks.
+ *
+ * Parameters:
+ * - plotId: The ID of the plot containing the parcel
+ * - parcelId: The ID of the parcel to check shares for
+ * - userAddress: The Ethereum address of the user to check shares for
+ *
+ * Validation: Validates Ethereum address format (42-character hex string starting with 0x)
+ *
+ * Returns: Number of shares the user owns in the specified parcel
+ */
 router.get(
   "/plot/:plotId/parcel/:parcelId/user/:userAddress/shares",
   async (req, res) => {
@@ -113,54 +140,16 @@ router.get(
 );
 
 /**
- * @swagger
- * /api/get_plot/plot/{plotId}/parcel/{parcelId}/total-shares:
- *   get:
- *     summary: Get Plot Parcel Total Shares
- *     description: Retrieves the total number of shares for a specific parcel within a plot
- *     tags: [Plot]
- *     parameters:
- *       - $ref: '#/components/parameters/PlotId'
- *       - name: parcelId
- *         in: path
- *         required: true
- *         description: The ID of the parcel
- *         schema:
- *           type: integer
- *           minimum: 1
- *           example: 101
- *     responses:
- *       200:
- *         description: Plot parcel total shares retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     parcelId:
- *                       type: string
- *                       example: "101"
- *                     totalShares:
- *                       type: string
- *                       example: "1000"
- *                 message:
- *                   type: string
- *                   example: "Plot parcel total shares retrieved successfully"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ * Get Plot Parcel Total Shares
+ *
+ * Why/When: Get the total number of shares for a specific parcel within a plot.
+ * Useful for calculating ownership percentages.
+ *
+ * Parameters:
+ * - plotId: The ID of the plot containing the parcel
+ * - parcelId: The ID of the parcel to get total shares for
+ *
+ * Returns: Total number of shares for the specified parcel
  */
 router.get("/plot/:plotId/parcel/:parcelId/total-shares", async (req, res) => {
   try {
@@ -205,68 +194,20 @@ router.get("/plot/:plotId/parcel/:parcelId/total-shares", async (req, res) => {
 });
 
 /**
- * @swagger
- * /api/get_plot/plot/{plotId}/user/{userAddress}/parcels:
- *   get:
- *     summary: Get User Parcels in Plot
- *     description: Retrieves all parcels that a specific user owns shares in within a plot
- *     tags: [Plot]
- *     parameters:
- *       - $ref: '#/components/parameters/PlotId'
- *       - $ref: '#/components/parameters/EthereumAddressParam'
- *       - name: parcel
- *         in: query
- *         required: false
- *         description: Optional parcel ID filter
- *         schema:
- *           type: integer
- *           minimum: 0
- *           example: 101
- *     responses:
- *       200:
- *         description: User parcels in plot retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     userAddress:
- *                       $ref: '#/components/schemas/EthereumAddress'
- *                     parcelFilter:
- *                       type: string
- *                       example: "0"
- *                     parcels:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["101", "102", "103"]
- *                     totalParcels:
- *                       type: number
- *                       example: 3
- *                 message:
- *                   type: string
- *                   example: "User parcels in plot retrieved successfully"
- *       400:
- *         description: Bad request - invalid user address format
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ * Get User Parcels in Plot
+ *
+ * Why/When: Get all parcels that a specific user owns shares in within a plot.
+ * Use for user dashboards or ownership overviews.
+ *
+ * Parameters:
+ * - plotId: The ID of the plot to check user parcels in
+ * - userAddress: The Ethereum address of the user to check parcels for
+ *
+ * Validation:
+ * - Validates plotId is a valid positive number
+ * - Validates Ethereum address format (42-character hex string starting with 0x)
+ *
+ * Returns: List of all parcel IDs where the user owns shares in the specified plot
  */
 router.get("/plot/:plotId/user/:userAddress/parcels", async (req, res) => {
   try {
@@ -341,59 +282,18 @@ router.get("/plot/:plotId/user/:userAddress/parcels", async (req, res) => {
 });
 
 /**
- * @swagger
- * /api/get_plot/plot/{plotId}/user/{userAddress}/ownership:
- *   get:
- *     summary: Get User Ownership Percentage in Plot
- *     description: |
- *       Retrieves the ownership percentage of a specific user in a plot.
- *       The percentage is calculated based on the user's total shares compared to the plot's total shares.
- *     tags: [Plot]
- *     parameters:
- *       - $ref: '#/components/parameters/PlotId'
- *       - $ref: '#/components/parameters/EthereumAddressParam'
- *     responses:
- *       200:
- *         description: User ownership percentage in plot retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     plotId:
- *                       type: string
- *                       example: "1"
- *                     userAddress:
- *                       $ref: '#/components/schemas/EthereumAddress'
- *                     ownershipPercentage:
- *                       type: string
- *                       example: "2500"
- *                       description: "Ownership percentage in basis points (10000 = 100%)"
- *                     ownershipPercent:
- *                       type: string
- *                       example: "25.00%"
- *                       description: "Human-readable ownership percentage"
- *                 message:
- *                   type: string
- *                   example: "User ownership percentage in plot retrieved successfully"
- *       400:
- *         description: Bad request - invalid user address format
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ * Get User Ownership Percentage in Plot
+ *
+ * Why/When: Retrieve the ownership percentage of a specific user in a plot.
+ * The percentage is calculated based on the user's total shares compared to the plot's total shares.
+ *
+ * Parameters:
+ * - plotId: The ID of the plot to check ownership in
+ * - userAddress: The Ethereum address of the user to check ownership for
+ *
+ * Validation: Validates Ethereum address format (42-character hex string starting with 0x)
+ *
+ * Returns: User's ownership percentage in the plot (both raw value and formatted percentage)
  */
 router.get("/plot/:plotId/user/:userAddress/ownership", async (req, res) => {
   try {

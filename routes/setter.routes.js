@@ -3,13 +3,26 @@ const {
   initializeContract,
   getContract,
 } = require("../utils/contractInstance");
-const { insertBlockParcelInfo } = require("../db/blockparcel");
-const { insertPlot, checkPlotNameExists } = require("../db/plots");
+const {
+  insertBlockParcelInfo,
+  syncBlockParcelWithBlockchain,
+  checkBlockParcelTableExists,
+} = require("../db/blockparcel");
+const {
+  insertPlot,
+  checkPlotNameExists,
+  checkPlotTableExists,
+  syncPlotsWithBlockchain,
+  updatePlotOwner,
+} = require("../db/plots");
 const {
   insertRequest,
   checkRequestExists,
   updateRequestStatus,
+  syncRequestsWithBlockchain,
+  checkRequestTableExists,
 } = require("../db/request");
+const { getRequestStatus, getPlotOwner } = require("../utils/info");
 
 const router = express.Router();
 
@@ -61,8 +74,20 @@ router.post("/create-token", async (req, res) => {
       }
     }
 
-    // Save to database
+    // Check if blockparcel table exists and sync if needed, then save to database
     try {
+      console.log("Checking if blockparcel table exists...");
+      const tableExists = await checkBlockParcelTableExists();
+
+      if (tableExists) {
+        console.log("Blockparcel table exists");
+      } else {
+        console.log("Blockparcel table does not exist");
+        console.log("Syncing blockparcel data with blockchain...");
+        await syncBlockParcelWithBlockchain();
+      }
+
+      // Insert the new record
       await insertBlockParcelInfo({
         token_id: parseInt(tokenId),
         parcel_name: parcelInfo,
@@ -159,8 +184,20 @@ router.post("/request-plot-transfer", async (req, res) => {
       }
     }
 
-    // Save request to database
+    // Check if request table exists and sync if needed, then save request to database
     try {
+      console.log("Checking if request table exists...");
+      const tableExists = await checkRequestTableExists();
+
+      if (tableExists) {
+        console.log("Request table exists");
+      } else {
+        console.log("Request table does not exist");
+        console.log("Syncing request data with blockchain...");
+        await syncRequestsWithBlockchain();
+      }
+
+      // Insert the new request
       await insertRequest({
         request_id: parseInt(requestId),
         plot_id: parseInt(plotId),
@@ -285,8 +322,20 @@ router.post("/request-parcel-transfer", async (req, res) => {
       }
     }
 
-    // Save request to database
+    // Check if request table exists and sync if needed, then save request to database
     try {
+      console.log("Checking if request table exists...");
+      const tableExists = await checkRequestTableExists();
+
+      if (tableExists) {
+        console.log("Request table exists");
+      } else {
+        console.log("Request table does not exist");
+        console.log("Syncing request data with blockchain...");
+        await syncRequestsWithBlockchain();
+      }
+
+      // Insert the new request
       await insertRequest({
         request_id: parseInt(requestId),
         plot_id: parseInt(_plotId),
@@ -405,7 +454,7 @@ router.post("/approve-transfer-execution", async (req, res) => {
     console.log("signerWalletLower", signerWalletLower);
     console.log("requestId", requestId);
     console.log("role", role);
-    // approve and execute
+
     // Check if request exists in database
     const existingRequest = await checkRequestExists(parseInt(requestId));
     if (!existingRequest) {
@@ -420,6 +469,15 @@ router.post("/approve-transfer-execution", async (req, res) => {
       });
     }
 
+    // Get initial plot owner before transaction
+    console.log("Getting initial plot owner...");
+    const initialPlotOwnerJson = await getPlotOwner(existingRequest.plot_id);
+    const initialPlotOwnerData = JSON.parse(initialPlotOwnerJson);
+    const initialPlotOwner = initialPlotOwnerData.success
+      ? initialPlotOwnerData.data.plotOwner
+      : null;
+    console.log("Initial plot owner:", initialPlotOwner);
+
     const tx = await contract.delegateApproveAndTransfer(
       signerWalletLower,
       requestId,
@@ -427,11 +485,81 @@ router.post("/approve-transfer-execution", async (req, res) => {
     );
     const receipt = await tx.wait();
 
-    // Update request status in database
+    // Check if request table exists and sync if needed, then update request status in database
     try {
+      console.log("Checking if request table exists...");
+      const tableExists = await checkRequestTableExists();
+
+      if (tableExists) {
+        console.log("Request table exists");
+      } else {
+        console.log("Request table does not exist");
+        console.log("Syncing request data with blockchain...");
+        await syncRequestsWithBlockchain();
+      }
+
+      // Update the request status
       await updateRequestStatus(parseInt(requestId), parseInt(role));
     } catch (dbError) {
       console.error("Database update error:", dbError.message);
+      // Continue with response as transaction was successful
+    }
+
+    // Check if all approvals are complete and update plot owner if needed
+    try {
+      console.log("Checking request status for all approvals...");
+      const requestStatusJson = await getRequestStatus(parseInt(requestId));
+      const requestStatusData = JSON.parse(requestStatusJson);
+
+      if (requestStatusData.success) {
+        const { landAuthorityApproved, lawyerApproved, bankApproved } =
+          requestStatusData.data;
+
+        // Check if all 3 approvals are true
+        if (landAuthorityApproved && lawyerApproved && bankApproved) {
+          console.log(
+            "All approvals completed! Checking for plot owner change..."
+          );
+
+          // Get current plot owner
+          const currentPlotOwnerJson = await getPlotOwner(
+            existingRequest.plot_id
+          );
+          const currentPlotOwnerData = JSON.parse(currentPlotOwnerJson);
+          const currentPlotOwner = currentPlotOwnerData.success
+            ? currentPlotOwnerData.data.plotOwner
+            : null;
+
+          console.log("Current plot owner:", currentPlotOwner);
+
+          // Compare initial vs current plot owner
+          if (
+            initialPlotOwner &&
+            currentPlotOwner &&
+            initialPlotOwner !== currentPlotOwner
+          ) {
+            console.log(
+              `Plot owner changed from ${initialPlotOwner} to ${currentPlotOwner}`
+            );
+            console.log("Updating plot owner in database...");
+
+            // Update plot owner in database
+            await updatePlotOwner(existingRequest.plot_id, currentPlotOwner);
+            console.log("Plot owner updated successfully in database");
+          } else {
+            console.log("Plot owner unchanged or data unavailable");
+          }
+        } else {
+          console.log("Not all approvals completed yet");
+        }
+      } else {
+        console.error("Failed to get request status:", requestStatusData.error);
+      }
+    } catch (ownerUpdateError) {
+      console.error(
+        "Error checking/updating plot owner:",
+        ownerUpdateError.message
+      );
       // Continue with response as transaction was successful
     }
 
@@ -502,6 +630,19 @@ router.post("/plot-initiate", async (req, res) => {
 
     // Check if plot name already exists
     try {
+      console.log("Checking if plots table exists ...");
+      const tableExists = await checkPlotTableExists();
+
+      if (tableExists) {
+        if (tableExists) {
+          console.log(`Plots table exists`);
+        }
+      } else {
+        console.log(`Plots table does not exist`);
+        console.log("Syncing plots data with blockchain...");
+        await syncPlotsWithBlockchain();
+      }
+
       const plotExists = await checkPlotNameExists(plotName);
       if (plotExists) {
         return res.status(409).json({
@@ -537,19 +678,19 @@ router.post("/plot-initiate", async (req, res) => {
     const tx = await contract.plotInitiate(plotName, parcelIds, parcelAmounts);
 
     // Get signer's address from the transaction
-    const ownerAddress = tx.from;
+    const callerAddress = tx.from;
     const receipt = await tx.wait();
 
     let plotId = Number(beforePlotId) + 1;
     console.log("new plotId", plotId);
 
-    // Save plot data to database
-    console.log("Owner Address :", ownerAddress);
+    // Sync with blockchain data first (only if table is empty), then save plot data to database
+    console.log("Caller Address :", callerAddress);
     try {
       const plotData = {
         plot_id: plotId,
         plot_name: plotName,
-        current_holder: ownerAddress,
+        current_holder: callerAddress,
         list_of_parcels: parcelIds,
         amount: parcelAmounts,
       };
