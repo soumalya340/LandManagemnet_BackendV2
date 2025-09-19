@@ -28,6 +28,7 @@ router.get("/plot/:plotId/parcel/:parcelId/shareholders", async (req, res) => {
     }
 
     const { plotId, parcelId } = req.params;
+    console.log(`Fetching shareholders for plot ${plotId}, parcel ${parcelId}`);
     const shareholders = await contract.getPlotAccountParcelShareholders(
       plotId,
       parcelId
@@ -104,6 +105,7 @@ router.get(
         });
       }
 
+      console.log(`Fetching shares for user ${userAddress} in plot ${plotId}, parcel ${parcelId}`);
       const shares = await contract.getPlotAccountUserShares(
         plotId,
         parcelId,
@@ -162,6 +164,7 @@ router.get("/plot/:plotId/parcel/:parcelId/total-shares", async (req, res) => {
     }
 
     const { plotId, parcelId } = req.params;
+    console.log(`Fetching total shares for plot ${plotId}, parcel ${parcelId}`);
     const totalShares = await contract.getPlotAccountParcelTotalShares(
       plotId,
       parcelId
@@ -249,6 +252,7 @@ router.get("/plot/:plotId/user/:userAddress/parcels", async (req, res) => {
       });
     }
 
+    console.log(`Fetching parcels for user ${userAddress} in plot ${plotIdNumber}`);
     const userParcels = await contract.getPlotAccountUserParcels(
       plotIdNumber,
       userAddress.toLowerCase()
@@ -321,6 +325,7 @@ router.get("/plot/:plotId/user/:userAddress/ownership", async (req, res) => {
       });
     }
 
+    console.log(`Fetching ownership percentage for user ${userAddress} in plot ${plotId}`);
     const ownershipPercentage = await contract.getOwnershipPercentage(
       plotId,
       userAddress.toLowerCase()

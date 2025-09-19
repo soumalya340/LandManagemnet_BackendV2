@@ -402,7 +402,7 @@
       ]
     },
     {
-      "name": "Health Check Calls",
+      "name": "Misc Calls",
       "item": [
         {
           "name": "28. API Health Check",
@@ -413,6 +413,18 @@
               "raw": "{{baseUrl}}/",
               "host": ["{{baseUrl}}"],
               "path": [""]
+            }
+          }
+        },
+        {
+          "name": "29. View API Call Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logs"]
             }
           }
         }

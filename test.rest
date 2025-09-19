@@ -7,6 +7,14 @@ GET http://localhost:8000/api/getter/all-land-info
 ### Get All Transfer Requests
 GET http://localhost:8000/api/getter/all-transfer-requests
 
-### Manual Sync All Data with Blockchain
-POST http://localhost:8000/api/setter/sync-all-with-blockchain
+### View API Call Logs
+GET http://localhost:8000/api/logs
+
+### Test Plot Transfer Request
+POST http://localhost:8000/api/setter/request-plot-transfer
 Content-Type: application/json
+
+{
+  "plotId": 1,
+  "to": "0x0987654321098765432109876543210987654321"
+}

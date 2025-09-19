@@ -8,6 +8,7 @@ const setterRoutes = require("./routes/setter.routes");
 const getPlotRoutes = require("./routes/get_plot.routes");
 const dbManagementRoutes = require("./routes/db-management.routes");
 const { swaggerUi, specs } = require("./config/swagger");
+const { logEndpointHit, loadLogs } = require("./middleware/connect");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -29,6 +30,9 @@ app.use(express.json());
 // Middleware to parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
 
+// Logging middleware to track all API calls
+app.use(logEndpointHit);
+
 /**
  * @swagger
  * /:
@@ -47,6 +51,24 @@ app.use(express.urlencoded({ extended: true }));
  */
 app.get("/", (req, res) => {
   res.send("It's Land Management Api endpoint");
+});
+
+// Endpoint to view API call logs
+app.get("/api/logs", (req, res) => {
+  try {
+    const logs = loadLogs();
+    res.json({
+      success: true,
+      data: logs,
+      message: "API call logs retrieved successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: "Failed to retrieve logs",
+    });
+  }
 });
 
 // Swagger UI setup

@@ -35,6 +35,7 @@ const db = new Pool({
  */
 router.get("/health", async (req, res) => {
   try {
+    console.log("Checking database health...");
     const client = await db.connect();
     try {
       await client.query("SELECT 1");
