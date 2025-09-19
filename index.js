@@ -9,9 +9,33 @@ const getPlotRoutes = require("./routes/get_plot.routes");
 const dbManagementRoutes = require("./routes/db-management.routes");
 const { swaggerUi, specs } = require("./config/swagger");
 const { logEndpointHit, loadLogs } = require("./middleware/connect");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+// Database connection configuration
+const db = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: 5432,
+});
+
+// Function to check database connection
+async function checkDatabaseConnection() {
+  try {
+    const client = await db.connect();
+    await client.query("SELECT 1");
+    client.release();
+    console.log("✅ Database connection successful");
+    return true;
+  } catch (error) {
+    console.error("❌ Database connection failed:", error.message);
+    return false;
+  }
+}
 
 // Enable CORS for ALL sites, ALL methods, ALL headers - COMPLETELY OPEN
 app.use(
@@ -96,17 +120,22 @@ app.use("/api/db-management", dbManagementRoutes);
 // Function to start the server
 async function startServer() {
   try {
-    console.log("Starting server...");
+    console.log("🚀 Starting server...");
 
-    // Initialize blockchain connection when server starts
-    await initializeContract();
+    const dbConnected = await checkDatabaseConnection();
 
     // Start listening for HTTP requests
     app.listen(PORT, () => {
-      console.log(`Server listening at http://localhost:${PORT}`);
+      console.log(`🌐 Server listening at http://localhost:${PORT}`);
+      // Check database connection
+      console.log("🔍 Checking database connection...");
+      if (!dbConnected) {
+        console.error("❌ Server startup aborted: Database connection failed");
+        process.exit(1);
+      }
     });
   } catch (error) {
-    console.error("Failed to start server:", error.message);
+    console.error("❌ Failed to start server:", error.message);
     process.exit(1);
   }
 }

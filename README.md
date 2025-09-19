@@ -1,548 +1,1220 @@
-# Land Tokenization Backend API
+# API Endpoint Usage Guide
 
-A RESTful API backend service for the Land Tokenization platform, providing seamless integration with blockchain smart contracts for land asset management, plot ownership, and fractional tokenization.
+# BASE URL: http://localhost:8000
 
-## 🏗️ Architecture Overview
+# Index of API Endpoints
 
-This backend service acts as a bridge between the frontend applications and the blockchain smart contracts, providing a familiar REST API interface for all land tokenization operations.
+## POST Endpoints
 
-### Key Features
+1. Create Block Parcel Token
 
-- **Smart Contract Integration**: Direct integration with LandAssetManager and related contracts
-- **RESTful API Design**: Clean, intuitive endpoints for all operations
-- **Real-time Blockchain Interaction**: Live contract state queries and transaction execution
-- **Modular Architecture**: Organized route handlers for different functionalities
-- **Error Handling**: Comprehensive error handling for blockchain operations
-- **CORS Enabled**: Cross-origin resource sharing for web applications
+   - `/api/setter/create-token`
+   - Create new land token with block/parcel info
 
-## 📁 Project Structure
+2. Request Whole Plot Transfer
 
-```
-backend/
-├── index.js                      # Main server entry point with Swagger UI
-├── package.json                  # Dependencies and scripts
-├── test.rest                     # API testing file with comprehensive examples
-├── .gitignore                    # Git ignore rules
-├── routes/                       # API route handlers
-│   ├── getter.routes.js          # Read-only blockchain contract functions
-│   ├── setter.routes.js          # State-changing blockchain operations
-│   ├── get_plot.routes.js        # Plot-specific query operations
-│   ├── db-management.routes.js   # Database management operations
-│   └── admin.js                  # Administrative functions
-├── utils/                        # Utility functions
-│   ├── contractInstance.js       # Contract initialization and management
-│   └── abi.json                  # Smart contract ABI definitions
-├── db/                           # Database operations
-│   ├── db_utils.js              # Database utility functions
-│   ├── blockparcel.js           # Block parcel data operations
-│   ├── plots.js                 # Plot data operations
-│   └── request.js               # Transfer request operations
-└── config/                      # Configuration files
-    └── swagger.js               # Swagger API documentation setup
-```
+   - `/api/setter/request-plot-transfer`
+   - Request transfer of entire plot
 
-## 🚀 Quick Start
+3. Request Parcel Transfer
 
-### Prerequisites
+   - `/api/setter/request-parcel-transfer`
+   - Request transfer of parcels within a plot
 
-- Node.js >= 16.0.0
-- npm or yarn
-- Access to a blockchain network (local/testnet/mainnet)
-- Smart contracts deployed and contract address
-- Private key for transaction signing
+4. Approve Transfer Execution (Delegate)
 
-### Installation
+   - `/api/setter/approve-transfer-execution`
+   - Approve transfer as delegated authority
 
-1. **Clone and navigate to backend directory**:
+5. Initiate a New Plot
+   - `/api/setter/plot-initiate`
+   - Create new plot with parcel IDs and amounts
 
-   ```bash
-   cd backend
-   ```
+## GET Endpoints
 
-2. **Install dependencies**:
+### Blockchain Get Calls - Land
 
-   ```bash
-   npm install
-   ```
+1. Get Plot and Token ID Info
 
-3. **Environment Configuration**:
-   Create a `.env` file in the backend directory:
+   - `/api/getter/plot-and-token-id-info`
+   - Get current plot and token IDs
 
-   ```env
-   # Server Configuration
-   PORT=8000
-   NODE_ENV=development
+2. Get Token URI
 
-   # Blockchain Configuration
-   RPC_URL=your_rpc_endpoint_here
-   PRIVATE_KEY=your_private_key_here
-   CONTRACT_ADDRESS=your_deployed_contract_address
+   - `/api/getter/token/{tokenId}/uri`
+   - Get token metadata URI
 
-   # Database Configuration  
-   DB_HOST=your_database_host
-   DB_USER=your_database_user
-   DB_NAME=your_database_name
-   DB_PASSWORD=your_database_password
+3. Get Land Information
 
-   # Network Configuration (choose one)
-   # Local Development
-   # RPC_URL=http://localhost:8545
+   - `/api/getter/land/{tokenId}`
+   - Get detailed land token information
 
-   # Base Testnet
-   # RPC_URL=https://sepolia.base.org
+4. Get Plot Account Information
 
-   # Polygon Testnet  
-   # RPC_URL=https://rpc-amoy.polygon.technology
-   ```
+   - `/api/getter/plot/{plotId}/info`
+   - Get plot account details
 
-4. **Start the development server**:
+5. Get Transfer Request Status
 
-   ```bash
-   npm start
-   # or for development with auto-reload
-   npm run dev
-   ```
+   - `/api/getter/transfer/{requestId}/status`
+   - Check transfer request status
 
-5. **Verify server is running**:
-   ```bash
-   curl http://localhost:8000
-   # Should return: "It's Land Management Api endpoint"
-   ```
+6. Get All Plots Information
 
-## 📡 API Endpoints
+   - `/api/getter/all-plots-info`
+   - Get comprehensive information about all plots
 
-### Base URL
+7. Get All Land Information
 
-```
-http://localhost:8000/api
-```
+   - `/api/getter/all-land-info`
+   - Get comprehensive information about all land tokens
 
-### 📖 API Documentation
+8. Get All Transfer Requests
+   - `/api/getter/all-transfer-requests`
+   - Get comprehensive information about all transfer requests
 
-Interactive API documentation is available at:
-```
-http://localhost:8000/api-docs
-```
+### Blockchain Get Calls - Plot
 
-### Getter Endpoints (Read-Only Operations)
+9. Get Plot Parcel Shareholders
 
-#### Land & Token Information
-- `GET /getter/land/:tokenId` - Get detailed land information by token ID
-- `GET /getter/token/:tokenId/uri` - Get token metadata URI
-- `GET /getter/plots` - Get list of all plots in the system
-- `GET /getter/plot-and-token-id-info` - Get current plot and token ID counters
+   - `/api/get_plot/plot/{plotId}/parcel/{parcelId}/shareholders`
+   - Get all shareholders for a parcel
 
-#### Plot Account Information
-- `GET /getter/plot/:plotId/info` - Get plot account details (parcel IDs, amounts, owner)
+10. Get User Shares in Plot Parcel
 
-#### Transfer Request Status
-- `GET /getter/transfer/:requestId/status` - Get transfer request status and approvals
+    - `/api/get_plot/plot/{plotId}/parcel/{parcelId}/user/{userAddress}/shares`
+    - Get user's share count in a parcel
 
-### Plot Query Endpoints (Detailed Plot Operations)
+11. Get Plot Parcel Total Shares
 
-#### Plot Parcel Information
-- `GET /get_plot/plot/:plotId/parcel/:parcelId/shareholders` - Get all shareholders of a parcel
-- `GET /get_plot/plot/:plotId/parcel/:parcelId/total-shares` - Get total shares for a parcel
-- `GET /get_plot/plot/:plotId/parcel/:parcelId/user/:userAddress/shares` - Get user's shares in specific parcel
+    - `/api/get_plot/plot/{plotId}/parcel/{parcelId}/total-shares`
+    - Get total shares for a parcel
 
-#### User Plot Information  
-- `GET /get_plot/plot/:plotId/user/:userAddress/parcels` - Get all parcels a user owns in a plot
-- `GET /get_plot/plot/:plotId/user/:userAddress/ownership` - Get user's ownership percentage in a plot
+12. Get User Parcels in Plot
 
-### Setter Endpoints (State-Changing Operations)
+    - `/api/get_plot/plot/{plotId}/user/{userAddress}/parcels`
+    - Get all parcels where user owns shares
 
-#### Token & Plot Creation
-- `POST /setter/create-token` - Create new block parcel token
-  ```json
-  {
-    "blockInfo": "Block A1",
-    "parcelInfo": "Parcel 3", 
-    "tokenURI": "https://example.com/metadata/token5",
-    "totalSupply": 1000
-  }
-  ```
-
-- `POST /setter/plot-initiate` - Initiate a new plot with parcels
-  ```json
-  {
-    "plotName": "Plot 1",
-    "parcelIds": [1, 2],
-    "parcelAmounts": [100, 100]
-  }
-  ```
-
-#### Transfer Operations
-- `POST /setter/request-plot-transfer` - Request transfer of entire plot
-  ```json
-  {
-    "plotId": 1,
-    "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
-  }
-  ```
-
-- `POST /setter/request-parcel-transfer` - Request partial parcel transfer
-  ```json
-  {
-    "_parcelId": 1,
-    "parcelAmount": 75,
-    "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD",
-    "_plotId": 20
-  }
-  ```
-
-#### Transfer Approvals (Multi-signature)
-- `POST /setter/approve-transfer-execution` - Approve transfer by authority
-  ```json
-  {
-    "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
-    "requestId": "1",
-    "role": 1
-  }
-  ```
-  
-  **Roles:**
-  - `1`: Land Authority
-  - `2`: Bank  
-  - `3`: Lawyer
+13. Get User Ownership Percentage in Plot
+    - `/api/get_plot/plot/{plotId}/user/{userAddress}/ownership`
+    - Get user's ownership percentage in plot
 
 ### Database Management Endpoints
 
-#### Table Operations
-- `GET /db-management/show-table/:tableName` - View data from any table
-- `POST /db-management/create-table/:tableName` - Create new table with custom schema
-- `DELETE /db-management/table/:tableName` - Drop entire table
-- `POST /db-management/test-insertion/:tableName` - Test data insertion
+14. Database Health Check
 
-#### Database Health
-- `GET /db/test-connection` - Test database connectivity
+    - `/api/db-management/health`
+    - Check database connection status
+
+15. Show Plots Table Data
+
+    - `/api/db-management/show-plots`
+    - View all data from plots table
+
+16. Show Block Parcel Table Data
+
+    - `/api/db-management/show-blockparcel`
+    - View all data from blockparcelinfo table
+
+17. Show Request Table Data
+
+    - `/api/db-management/show-request`
+    - View all data from request table
+
+18. Get Plot by Name
+
+    - `/api/db-management/plot/{plotName}`
+    - Get plot details by plot name from database
+
+19. Get Specific Block and Parcel by Name
+    - `/api/db-management/blockparcel/{blockName}/{parcelName}`
+    - Get specific block and parcel details by names
 
 ### Administrative Endpoints
 
-#### Data Management
-- `DELETE /admin/block-parcel/:id` - Delete specific block parcel record
-- `DELETE /admin/table/:tableName` - Administrative table operations
+20. Drop Plots Table
 
-## 🔧 Configuration
+    - `/api/db-management/table/plots`
+    - Delete entire plots table (DELETE)
 
-### Environment Variables
+21. Drop Request Table
 
-| Variable           | Description                  | Required | Default     |
-| ------------------ | ---------------------------- | -------- | ----------- |
-| `PORT`             | Server port                  | No       | 8000        |
-| `NODE_ENV`         | Environment mode             | No       | development |
-| `RPC_URL`          | Blockchain RPC endpoint      | Yes      | -           |
-| `PRIVATE_KEY`      | Private key for transactions | Yes      | -           |
-| `CONTRACT_ADDRESS` | Deployed contract address    | Yes      | -           |
-| `DB_HOST`          | Database host address        | Yes      | -           |
-| `DB_USER`          | Database username           | Yes      | -           |
-| `DB_NAME`          | Database name               | Yes      | -           |
-| `DB_PASSWORD`      | Database password           | Yes      | -           |
+    - `/api/db-management/table/request`
+    - Delete entire request table (DELETE)
 
-### Smart Contract Integration
+22. Drop Block Parcel Info Table
+    - `/api/db-management/table/blockparcelinfo`
+    - Delete entire blockparcelinfo table (DELETE)
 
-The backend automatically connects to your deployed smart contracts using:
+### Health Check & Utility Endpoints
 
-1. **Contract Address**: Specified in environment variables
-2. **ABI**: Stored in `utils/abi.json`
-3. **Provider**: Configured via RPC_URL
-4. **Signer**: Initialized with PRIVATE_KEY
+23. API Health Check
 
-## 🧪 Testing
+    - `/`
+    - Basic health check to verify API is running
 
-### Using REST Client
+24. View API Call Logs
 
-Use the included `test.rest` file with VS Code REST Client extension. The file contains comprehensive examples for all endpoints:
+    - `/api/logs`
+    - View all logged API calls and their details
 
-```http
-# Example: Create Block Parcel Token
+25. API Documentation (Swagger UI)
+    - `/api-docs`
+    - Access interactive API documentation
+
+---
+
+# POST Endpoints Usage Guide
+
+---
+
+## 1. Create Block Parcel Token
+
+**Why/When:** Use this to create a new land token with block and parcel information. Typically used by admin or authorized users to mint new tokens.
+
+```
 POST http://localhost:8000/api/setter/create-token
 Content-Type: application/json
 
 {
   "blockInfo": "Block A1",
-  "parcelInfo": "Parcel 3",
-  "tokenURI": "https://example.com/metadata/token5",
-  "totalSupply": 1000
-}
-
-# Example: Initiate Plot
-POST http://localhost:8000/api/setter/plot-initiate
-Content-Type: application/json
-
-{
-  "plotName": "Plot 1",
-  "parcelIds": [1, 2],
-  "parcelAmounts": [100, 100]
-}
-
-# Example: Request Plot Transfer
-POST http://localhost:8000/api/setter/request-plot-transfer
-Content-Type: application/json
-
-{
-  "plotId": 1,
-  "to": "0xeeFB89a2a00F8206AbB031F0c4D9fa07861c5BbD"
+  "parcelInfo": "Parcel P1",
+  "tokenURI": "https://example.com/token/metadata/1",
+  "totalSupply": "1000"
 }
 ```
 
-### Manual Testing
-
-```bash
-# Test server health
-curl http://localhost:8000
-
-# Test database connection
-curl http://localhost:8000/api/db/test-connection
-
-# Get all plots
-curl http://localhost:8000/api/getter/plots
-
-# Get land information
-curl http://localhost:8000/api/getter/land/1
-
-# Get plot information
-curl http://localhost:8000/api/getter/plot/1/info
-
-# Create token
-curl -X POST http://localhost:8000/api/setter/create-token \
-  -H "Content-Type: application/json" \
-  -d '{"blockInfo":"Block A1","parcelInfo":"Parcel 3","tokenURI":"https://example.com/metadata/token5","totalSupply":1000}'
-
-# View database table
-curl http://localhost:8000/api/db-management/show-table/blockparcelinfo
-```
-
-## 🔐 Security Considerations
-
-### Environment Variables
-
-- ⚠️ **Never commit `.env` file to version control**
-- 🔒 Use environment-specific private keys and database credentials
-- 🛡️ Rotate private keys and database passwords regularly in production
-- 🗄️ Use secure database connections (SSL) in production
-
-### CORS Configuration
-
-Current CORS settings allow all origins (`*`). For production:
-
-```javascript
-app.use(
-  cors({
-    origin: ["https://yourfrontend.com"], // Specific origins only
-    credentials: true,
-    methods: ["GET", "POST"],
-  })
-);
-```
-
-### Rate Limiting
-
-Consider implementing rate limiting for production:
-
-```bash
-npm install express-rate-limit
-```
-
-## 🚀 Deployment
-
-### Local Development
-
-```bash
-npm start
-```
-
-### Production Deployment
-
-1. **Environment Setup**:
-
-   ```bash
-   export NODE_ENV=production
-   export PORT=3000
-   export RPC_URL=your_mainnet_rpc
-   # ... other production variables
-   ```
-
-2. **Process Management** (using PM2):
-
-   ```bash
-   npm install -g pm2
-   pm2 start index.js --name "land-api"
-   pm2 startup
-   pm2 save
-   ```
-
-3. **Docker Deployment**:
-   ```dockerfile
-   FROM node:18-alpine
-   WORKDIR /app
-   COPY package*.json ./
-   RUN npm ci --only=production
-   COPY . .
-   EXPOSE 8000
-   CMD ["npm", "start"]
-   ```
-
-### Reverse Proxy (Nginx)
-
-```nginx
-server {
-    listen 80;
-    server_name your-api-domain.com;
-
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-## 🔍 Monitoring & Logging
-
-### Health Check Endpoints
-
-```bash
-# API Health Check
-curl http://localhost:8000/
-
-# Database Connection Check
-curl http://localhost:8000/api/db/test-connection
-
-# Swagger API Documentation
-curl http://localhost:8000/api-docs
-```
-
-### Error Handling
-
-The server includes comprehensive error handling for:
-
-- Blockchain connection issues
-- Contract call failures
-- Database connectivity issues
-- Invalid request parameters
-- Network timeouts
-- Multi-signature approval validation
-
-### Logs
-
-Monitor application logs for:
-
-- Server startup messages
-- Contract initialization status  
-- Database connection status
-- Transaction receipts and gas usage
-- Transfer request approvals
-- Error details with timestamps
-
-## 🤝 Contributing
-
-1. **Code Style**: Follow existing patterns in route handlers
-2. **Error Handling**: Always use try-catch blocks for async operations
-3. **Documentation**: Update README for new endpoints
-4. **Testing**: Test new endpoints with the REST client
-
-### Adding New Endpoints
-
-1. **Choose appropriate route file** (`getter.routes.js` for read operations, `setter.routes.js` for blockchain writes, `db-management.routes.js` for database operations)
-2. **Add Swagger documentation** using JSDoc comments for API documentation
-3. **Add validation** for request parameters (especially Ethereum addresses and numeric values)
-4. **Handle async operations** with proper error catching and transaction receipts
-5. **Update database operations** if the endpoint interacts with persistent data
-6. **Test thoroughly** with various inputs using the `test.rest` file
-7. **Update this README** with new endpoint information
-
-## 📚 API Response Format
-
-### Success Response
+**Response:**
 
 ```json
 {
   "success": true,
   "data": {
-    // Response data
-  }
+    "tokenId": "1",
+    "blockInfo": "Block A1",
+    "parcelInfo": "Parcel P1",
+    "tokenURI": "https://example.com/token/metadata/1",
+    "totalSupply": "1000",
+    "transaction": {
+      "hash": "0x1234567890abcdef1234567890abcdef12345678",
+      "gasUsed": "21000",
+      "status": 1
+    },
+    "confirmedAt": "2024-01-15T10:30:00.000Z"
+  },
+  "message": "Block parcel token created successfully"
 }
 ```
 
-### Error Response
+---
 
-```json
+## 2. Request Whole Plot Transfer
+
+**Why/When:** Use this to request the transfer of an entire plot from one address to another. Used by plot owners or authorized users to initiate a transfer.
+
+```
+POST http://localhost:8000/api/setter/request-plot-transfer
+Content-Type: application/json
+
 {
-  "success": false,
-  "error": "Error message",
-  "details": "Additional error details"
+  "plotId": 1,
+  "to": "0x0987654321098765432109876543210987654321"
 }
 ```
 
-### Transaction Response
+**Conditions & Restrictions:**
+
+- Can only be initiated if the sender has 100% ownership of the plot (holds all shares)
+- Sender must be the current holder of the plot Ownership NFT token
+- The transfer request can be initiated by any address that meets the above conditions
+- The transfer will remain pending until approved by required authorities
+
+**Response:**
 
 ```json
 {
   "success": true,
   "data": {
     "requestId": "1",
-    "plotId": 1,
+    "plotId": "1",
+    "to": "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298",
     "transaction": {
-      "hash": "0x1234567890abcdef...",
-      "gasUsed": "84523",
+      "hash": "0x1234567890abcdef1234567890abcdef12345678",
+      "gasUsed": "21000",
       "status": 1
     },
-    "confirmedAt": "2023-12-07T10:30:45.123Z"
+    "confirmedAt": "2024-01-15T10:30:00.000Z"
   },
   "message": "Plot transfer request created successfully"
 }
 ```
 
-## 🆘 Troubleshooting
+---
 
-### Common Issues
+## 3. Request Parcel Transfer
 
-1. **Contract Connection Failed**
-   - Verify RPC_URL is accessible and network is up
-   - Check CONTRACT_ADDRESS is correct and deployed
-   - Ensure network matches deployed contract
-   - Verify PRIVATE_KEY format (64-character hex without 0x prefix)
+**Why/When:** Use this to request the transfer of a parcel (or parcels) from one address to another inside a plot. Used by parcel owners or authorized users.
 
-2. **Database Connection Failed**
-   - Verify DB_HOST, DB_USER, DB_NAME, DB_PASSWORD are correct
-   - Check if PostgreSQL service is running
-   - Ensure database exists and user has proper permissions
-   - Verify network connectivity to database host
+```
+POST http://localhost:8000/api/setter/request-parcel-transfer
+Content-Type: application/json
 
-3. **Transaction Failures**
-   - Verify PRIVATE_KEY wallet has sufficient balance for gas fees
-   - Check if contract function exists and is spelled correctly
-   - Ensure correct parameter types are passed
-   - Verify signer has required permissions for the function
-
-4. **Transfer Approval Issues**
-   - Check if request ID exists in database
-   - Verify signer wallet has the correct role (1=Land Authority, 2=Bank, 3=Lawyer)
-   - Ensure transfer request hasn't already been fully approved
-   - Check if plot/parcel exists and has valid ownership
-
-5. **Server Won't Start**
-   - Verify all required environment variables are set
-   - Check if port 8000 is available
-   - Review dependency installation with `npm install`
-   - Check PostgreSQL connection parameters
-
-### Debug Mode
-
-Set environment variable for detailed logging:
-
-```bash
-export DEBUG=1
-npm start
+{
+  "_parcelId": 101,
+  "parcelAmount": 1000,
+  "to": "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298",
+  "_plotId": 1
+}
 ```
 
-## 📝 License
+**Response:**
 
-MIT License - see LICENSE file for details
+```json
+{
+  "success": true,
+  "data": {
+    "requestId": "1",
+    "_parcelId": 101,
+    "parcelAmount": 1000,
+    "to": "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298",
+    "_plotId": 1,
+    "transaction": {
+      "hash": "0x1234567890abcdef1234567890abcdef12345678",
+      "gasUsed": "21000",
+      "status": 1
+    },
+    "confirmedAt": "2024-01-15T10:30:00.000Z"
+  },
+  "message": "Parcel transfer request created successfully"
+}
+```
 
-## 🔗 Related Documentation
+---
 
-- [Smart Contracts Documentation](../smart_contracts/README.md)
-- [Frontend Documentation](../frontend/README.md)
-- [Deployment Guide](../docs/DEPLOYMENT.md)
-- [API Reference](../docs/API.md)
+## 4. Approve Transfer Execution (Delegate)
+
+**Why/When:** Use this to approve and execute a transfer request as a delegated authority (Land Authority, Bank, or Lawyer). Each role has specific approval rights in the transfer process.
+
+**Roles:**
+
+- Land Authority = 1
+- Bank Authority = 2
+- Lawyer Authority = 3
+
+```
+POST http://localhost:8000/api/setter/approve-transfer-execution
+Content-Type: application/json
+
+{
+  "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+  "requestId": "1",
+  "role": 1
+}
+```
+
+**Conditions & Restrictions:**
+
+- Can only be called by authorized delegates (Land Authority, Bank, or Lawyer)
+- Each role can only approve once per transfer request
+- All required authorities must approve before transfer can be finalized
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "signerWallet": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+    "requestId": "1",
+    "role": 1,
+    "roleName": "Land Authority",
+    "transaction": {
+      "hash": "0x1234567890abcdef1234567890abcdef12345678",
+      "gasUsed": "21000",
+      "status": 1
+    },
+    "confirmedAt": "2024-01-15T10:30:00.000Z"
+  },
+  "message": "Transfer approved by Land Authority successfully"
+}
+```
+
+---
+
+## 5. Initiate a New Plot
+
+**Why/When:** Use this to initiate a new plot with the given parcel IDs and parcel amounts. Used by admin or authorized users during plot creation.
+
+```
+POST http://localhost:8000/api/setter/plot-initiate
+Content-Type: application/json
+
+{
+  "plotName": "Agricultural Plot A1",
+  "parcelIds": [101, 102, 103],
+  "parcelAmounts": [1000, 800, 1200]
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "transaction": {
+      "hash": "0x1234567890abcdef1234567890abcdef12345678",
+      "gasUsed": "21000",
+      "status": 1
+    },
+    "plotId": "1",
+    "plotName": "Agricultural Plot A1",
+    "parcelIds": [101, 102, 103],
+    "parcelAmounts": [1000, 800, 1200]
+  },
+  "message": "Plot initiated successfully"
+}
+```
+
+---
+
+# GET Endpoints Usage Guide
+
+---
+
+## 1. Get Land Information
+
+**Why/When:** Get detailed information about a specific land token by its ID. Use this to display land details to users.
+
+```
+GET http://localhost:8000/api/getter/land/1
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "tokenId": "1",
+    "blockInfo": "Block A1",
+    "parcelInfo": "Parcel P1",
+    "blockParcelTokenURI": "https://example.com/token/1",
+    "totalSupply": "1000",
+    "plotAllocation": ["100", "200", "300"]
+  },
+  "message": "Land information retrieved successfully"
+}
+```
+
+---
+
+## 2. Get Plot Account Information
+
+**Why/When:** Retrieve detailed information about a specific plot account by its ID. Useful for showing plot composition and ownership.
+
+```
+GET http://localhost:8000/api/getter/plot/1/info
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plotId": "1",
+    "plotAccount": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+    "parcelIds": ["101", "102", "103"],
+    "parcelAmounts": ["1000", "800", "1200"]
+  },
+  "message": "Plot account information retrieved successfully"
+}
+```
+
+---
+
+## 3. Get All Plots
+
+**Why/When:** Get a list of all plots in the system. Use this to display available plots or for admin overviews.
+
+```
+GET http://localhost:8000/api/getter/plots
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plots": ["1", "2", "3"],
+    "totalPlots": 3
+  },
+  "message": "List of all plots retrieved successfully"
+}
+```
+
+---
+
+## 4. Get Token URI
+
+**Why/When:** Retrieve the token URI for a specific land token. Use this to fetch metadata or images for a token.
+
+```
+GET http://localhost:8000/api/getter/token/1/uri
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "tokenId": "1",
+    "uri": "https://example.com/token/1"
+  },
+  "message": "Token URI retrieved successfully"
+}
+```
+
+---
+
+## 5. Get Transfer Request Status
+
+**Why/When:** Check the status of a transfer request by its ID. Only the sender of the request can access its status. Use for tracking transfer progress.
+
+```
+GET http://localhost:8000/api/getter/transfer/1/status
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "requestId": "1",
+    "from": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+    "to": "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298",
+    "parcelId": "101",
+    "parcelAmount": "1000",
+    "isPlotTransfer": false,
+    "plotId": "0",
+    "timestamp": "1642250000",
+    "status": "1",
+    "landAuthorityApproved": "true",
+    "lawyerApproved": "false",
+    "bankApproved": "false"
+  },
+  "message": "Transfer request status retrieved successfully",
+  "warning": "This endpoint should have authentication in production"
+}
+```
+
+---
+
+## 6. Get Plot and Token ID Info
+
+**Why/When:** Retrieve the current plot ID and token ID from the contract. Useful for admin or for creating new records.
+
+```
+GET http://localhost:8000/api/getter/plot-and-token-id-info
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plotId": "1",
+    "tokenId": "1001"
+  },
+  "message": "Plot and token ID info retrieved successfully"
+}
+```
+
+---
+
+## 7. Get Plot Parcel Shareholders
+
+**Why/When:** Get all shareholders for a specific parcel within a plot. Use this to display ownership breakdown for a parcel.
+
+```
+GET http://localhost:8000/api/get_plot/plot/1/parcel/101/shareholders
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plotId": "1",
+    "parcelId": "101",
+    "shareholders": [
+      "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+      "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298"
+    ],
+    "totalShareholders": 2
+  },
+  "message": "Plot parcel shareholders retrieved successfully"
+}
+```
+
+---
+
+## 8. Get User Shares in Plot Parcel
+
+**Why/When:** Retrieve the number of shares a specific user owns in a plot parcel. Use for user dashboards or ownership checks.
+
+```
+GET http://localhost:8000/api/get_plot/plot/1/parcel/101/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/shares
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plotId": "1",
+    "parcelId": "101",
+    "userAddress": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+    "shares": "500"
+  },
+  "message": "User shares in plot parcel retrieved successfully"
+}
+```
+
+---
+
+## 9. Get Plot Parcel Total Shares
+
+**Why/When:** Get the total number of shares for a specific parcel within a plot. Useful for calculating ownership percentages.
+
+```
+GET http://localhost:8000/api/get_plot/plot/1/parcel/101/total-shares
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plotId": "1",
+    "parcelId": "101",
+    "totalShares": "1000"
+  },
+  "message": "Plot parcel total shares retrieved successfully"
+}
+```
+
+---
+
+## 10. Get User Parcels in Plot
+
+**Why/When:** Get all parcels that a specific user owns shares in within a plot. Use for user dashboards or ownership overviews.
+
+```
+GET http://localhost:8000/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/parcels
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plotId": 1,
+    "userAddress": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+    "parcels": ["101", "102", "103"],
+    "totalParcels": 3
+  },
+  "message": "User parcels in plot retrieved successfully"
+}
+```
+
+---
+
+## 11. Get User Ownership Percentage in Plot
+
+**Why/When:** Retrieve the ownership percentage of a specific user in a plot. The percentage is calculated based on the user's total shares compared to the plot's total shares.
+
+```
+GET http://localhost:8000/api/get_plot/plot/1/user/0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0/ownership
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "plotId": "1",
+    "userAddress": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+    "ownershipPercentage": "2500",
+    "ownershipPercent": "25.00%"
+  },
+  "message": "User ownership percentage in plot retrieved successfully"
+}
+```
+
+---
+
+# Error Response Format
+
+All endpoints return errors in a consistent format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Operation failed",
+    "details": "Detailed error description",
+    "code": "CALL_EXCEPTION",
+    "timestamp": "2024-01-15T10:30:00.000Z",
+    "endpoint": "/api/endpoint/path"
+  }
+}
+```
+
+---
+
+# Database Management Endpoints
+
+---
+
+## 12. View Database Table Data
+
+**Why/When:** View all data from any database table. Useful for debugging and data inspection.
+
+```
+GET http://localhost:8000/api/db-management/show-table/blockparcelinfo
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Data retrieved from 'blockparcelinfo' successfully",
+  "data": [
+    {
+      "id": 1,
+      "token_id": 1,
+      "parcel_name": "Parcel 3",
+      "block_name": "Block A1",
+      "total_supply": "1000",
+      "metadata": "https://example.com/metadata/token5"
+    }
+  ]
+}
+```
+
+---
+
+## 13. Get Plot by Name (Database)
+
+**Why/When:** Get plot details by plot name from the local database. Useful for searching plots by name.
+
+```
+GET http://localhost:8000/api/db-management/plot/Plot7
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Plot details retrieved successfully",
+  "data": {
+    "id": 1,
+    "plot_name": "Plot7",
+    "parcel_ids": [4, 5],
+    "parcel_amounts": [100, 100],
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 14. Get Specific Block and Parcel by Name
+
+**Why/When:** Get specific block and parcel details by their names from the database. Useful for searching specific block-parcel combinations.
+
+```
+GET http://localhost:8000/api/db-management/blockparcel/Block A1/Parcel 5
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Block parcel details retrieved successfully",
+  "data": {
+    "id": 1,
+    "token_id": 1,
+    "block_name": "Block A1",
+    "parcel_name": "Parcel 5",
+    "total_supply": "1000",
+    "metadata": "https://example.com/metadata/token5",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 15. Create Database Table
+
+**Why/When:** Create a new database table with custom schema. Useful for setting up new data structures.
+
+```
+POST http://localhost:8000/api/db-management/create-table/users
+Content-Type: application/json
+
+{
+  "columns": "id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, email VARCHAR(100) UNIQUE, password VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Table 'users' created successfully",
+  "data": {
+    "tableName": "users",
+    "columns": "id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, email VARCHAR(100) UNIQUE, password VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+  }
+}
+```
+
+---
+
+## 16. Test Database Insertion
+
+**Why/When:** Insert test data into any database table. Useful for testing database operations.
+
+```
+POST http://localhost:8000/api/db-management/test-insertion/users
+Content-Type: application/json
+
+{
+  "columns": ["username", "email", "password"],
+  "values": ["john_doe", "john@example4.com", "password123"]
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Data inserted into 'users' successfully",
+  "data": {
+    "id": 1,
+    "username": "john_doe",
+    "email": "john@example4.com",
+    "password": "password123",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 17. Drop Database Table
+
+**Why/When:** Delete entire database table. Use with caution - this permanently removes all data.
+
+```
+DELETE http://localhost:8000/api/db-management/table/users
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Table 'users' dropped successfully"
+}
+```
+
+---
+
+# Administrative Endpoints
+
+---
+
+## 18. Delete Block Parcel Record
+
+**Why/When:** Remove a specific block parcel record from the database. Administrative function.
+
+```
+DELETE http://localhost:8000/api/admin/block-parcel/1
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Block parcel record deleted successfully"
+}
+```
+
+---
+
+# Health Check Endpoints
+
+---
+
+## 19. Test Database Connection
+
+**Why/When:** Check if the database connection is working properly. Useful for health monitoring.
+
+```
+GET http://localhost:8000/api/db/test-connection
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Database connection successful",
+  "data": {
+    "status": "connected",
+    "timestamp": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 20. API Health Check
+
+**Why/When:** Basic health check to verify the API is running.
+
+```
+GET http://localhost:8000/
+Content-Type: application/json
+```
+
+**Response:**
+
+```
+It's Land Management Api endpoint
+```
+
+---
+
+## 21. API Documentation (Swagger UI)
+
+**Why/When:** Access interactive API documentation.
+
+```
+GET http://localhost:8000/api-docs
+Content-Type: text/html
+```
+
+**Returns:** Interactive Swagger UI documentation interface
+
+---
+
+## 6. Get All Plots Information
+
+**Why/When:** Get comprehensive information about all plots in the blockchain with proper BigInt handling and consistent data formatting.
+
+```
+GET http://localhost:8000/api/getter/all-plots-info
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "Plot 1": {
+      "plotAccount": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+      "plotOwner": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+      "plotName": "Agricultural Plot A1",
+      "parcelIds": ["101", "102", "103"],
+      "parcelAmounts": ["1000", "800", "1200"]
+    }
+  },
+  "message": "Plot account information retrieved successfully"
+}
+```
+
+---
+
+## 7. Get All Land Information
+
+**Why/When:** Get comprehensive information about all land tokens in the blockchain with proper BigInt handling.
+
+```
+GET http://localhost:8000/api/getter/all-land-info
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "Land 1": {
+      "blockInfo": "Block A1",
+      "parcelInfo": "Parcel P1",
+      "blockParcelTokenURI": "https://example.com/token/1",
+      "totalSupply": "1000",
+      "plotAllocation": ["100", "200", "300"]
+    }
+  },
+  "message": "Land information retrieved successfully"
+}
+```
+
+---
+
+## 8. Get All Transfer Requests
+
+**Why/When:** Get comprehensive information about all transfer requests in the blockchain with proper BigInt handling.
+
+```
+GET http://localhost:8000/api/getter/all-transfer-requests
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "Transfer Request 1": {
+      "from": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+      "to": "0x1B8683e1885B3ee93524cD58BC10Cf3Ed6af4298",
+      "parcelId": "101",
+      "parcelAmount": "1000",
+      "isPlotTransfer": false,
+      "plotId": "1",
+      "timestamp": "1642250000",
+      "status": "1",
+      "landAuthorityApproved": true,
+      "lawyerApproved": false,
+      "bankApproved": false
+    }
+  },
+  "message": "Transfer request information retrieved successfully"
+}
+```
+
+---
+
+## 9. Database Health Check
+
+**Why/When:** Check if the database connection is working properly. Useful for health monitoring and debugging database connectivity issues.
+
+```
+GET http://localhost:8000/api/db-management/health
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Database connection is healthy"
+}
+```
+
+---
+
+## 10. Show Plots Table Data
+
+**Why/When:** View all data from the plots table in the database. Useful for debugging and data inspection of plot records.
+
+```
+GET http://localhost:8000/api/db-management/show-plots
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Plots data retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "plot_id": 1,
+      "plot_name": "Agricultural Plot A1",
+      "current_holder": "0x742d35Cc6634C0532925a3b8D2DE0f87b7b82fd0",
+      "list_of_parcels": [101, 102, 103],
+      "amount": [1000, 800, 1200],
+      "created_at": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## 11. Show Block Parcel Table Data
+
+**Why/When:** View all data from the blockparcelinfo table in the database. Useful for debugging and data inspection of block parcel records.
+
+```
+GET http://localhost:8000/api/db-management/show-blockparcel
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Block parcel data retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "token_id": 1,
+      "parcel_name": "Parcel P1",
+      "block_name": "Block A1",
+      "total_supply": "1000",
+      "metadata": "https://example.com/metadata/token1",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## 12. Show Request Table Data
+
+**Why/When:** View all data from the request table in the database. Useful for debugging and data inspection of transfer request records.
+
+```
+GET http://localhost:8000/api/db-management/show-request
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Request data retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "request_id": 1,
+      "plot_id": 1,
+      "is_plot": true,
+      "land_authority": false,
+      "lawyer": false,
+      "bank": false,
+      "current_status": "PENDING",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## 13. View API Call Logs
+
+**Why/When:** View all logged API calls and their details including request/response information, console logs, and performance metrics.
+
+```
+GET http://localhost:8000/api/logs
+Content-Type: application/json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "logs": {
+      "1": {
+        "timestamp": "2024-01-15T10:30:00.000Z",
+        "endpoint": "GET /api/getter/all-plots-info",
+        "method": "GET",
+        "url": "/api/getter/all-plots-info",
+        "headers": {...},
+        "query": {},
+        "body": {},
+        "statusCode": 200,
+        "duration": "150ms",
+        "consoleLogs": [...]
+      }
+    },
+    "counter": 1
+  },
+  "message": "API call logs retrieved successfully"
+}
+```
+
+---
+
+# Complete Endpoint Summary
+
+## Total Endpoints: 25
+
+### By Category:
+
+- **Setter Endpoints (Blockchain Writes):** 5
+- **Blockchain Get Calls - Land:** 8
+- **Blockchain Get Calls - Plot:** 5
+- **Database Management:** 6
+- **Administrative:** 3
+- **Health Check & Utility:** 3
+
+### By HTTP Method:
+
+- **GET:** 20 endpoints
+- **POST:** 5 endpoints
+- **DELETE:** 3 endpoints
+
+---
+
+# Authentication Notes
+
+- Most endpoints require proper authentication in production
+- The transfer status endpoint specifically requires that only the sender of the request can access its status
+- Delegate approval endpoints require specific role-based permissions
+- Consider implementing proper authentication middleware for production use
