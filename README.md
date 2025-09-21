@@ -130,30 +130,14 @@
     - `/api/db-management/blockparcel/{blockName}/{parcelName}`
     - Get specific block and parcel details by names
 
-### Administrative Endpoints
-
-20. Drop Plots Table
-
-    - `/api/db-management/table/plots`
-    - Delete entire plots table (DELETE)
-
-21. Drop Request Table
-
-    - `/api/db-management/table/request`
-    - Delete entire request table (DELETE)
-
-22. Drop Block Parcel Info Table
-    - `/api/db-management/table/blockparcelinfo`
-    - Delete entire blockparcelinfo table (DELETE)
-
 ### Health Check & Utility Endpoints
 
-23. API Health Check
+20. API Health Check
 
     - `/`
     - Basic health check to verify API is running
 
-24. View API Call Logs
+21. View API Call Logs
 
     - `/api/logs`
     - View all logged API calls and their details
@@ -840,55 +824,11 @@ Content-Type: application/json
 
 ---
 
-## 17. Drop Database Table
-
-**Why/When:** Delete entire database table. Use with caution - this permanently removes all data.
-
-```
-DELETE http://localhost:8000/api/db-management/table/users
-Content-Type: application/json
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "message": "Table 'users' dropped successfully"
-}
-```
-
----
-
-# Administrative Endpoints
-
----
-
-## 18. Delete Block Parcel Record
-
-**Why/When:** Remove a specific block parcel record from the database. Administrative function.
-
-```
-DELETE http://localhost:8000/api/admin/block-parcel/1
-Content-Type: application/json
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "message": "Block parcel record deleted successfully"
-}
-```
-
----
-
 # Health Check Endpoints
 
 ---
 
-## 19. Test Database Connection
+## 17. Test Database Connection
 
 **Why/When:** Check if the database connection is working properly. Useful for health monitoring.
 
@@ -912,7 +852,7 @@ Content-Type: application/json
 
 ---
 
-## 20. API Health Check
+## 18. API Health Check
 
 **Why/When:** Basic health check to verify the API is running.
 
@@ -1176,7 +1116,7 @@ Content-Type: application/json
 
 # Complete Endpoint Summary
 
-## Total Endpoints: 24
+## Total Endpoints: 21
 
 ### By Category:
 
@@ -1184,13 +1124,11 @@ Content-Type: application/json
 - **Blockchain Get Calls - Land:** 8
 - **Blockchain Get Calls - Plot:** 5
 - **Database Management:** 6
-- **Administrative:** 3
 - **Health Check & Utility:** 2
 
 ### By HTTP Method:
 
 - **GET:** 19 endpoints
 - **POST:** 5 endpoints
-- **DELETE:** 3 endpoints
 
 ---
