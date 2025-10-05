@@ -7,7 +7,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://99.81.54.249:3000",
+      "value": "http://localhost:8000",
       "type": "string"
     }
   ],
