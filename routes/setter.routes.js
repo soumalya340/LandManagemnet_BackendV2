@@ -22,7 +22,11 @@ const {
   syncRequestsWithBlockchain,
   checkRequestTableExists,
 } = require("../db/request");
-const { getRequestStatus, getPlotOwner } = require("../utils/info");
+const {
+  getRequestStatus,
+  getPlotOwner,
+  getAllLandInfo,
+} = require("../utils/info");
 
 const router = express.Router();
 
@@ -590,6 +594,277 @@ router.post("/approve-transfer-execution", async (req, res) => {
         details: error.message,
         timestamp: new Date().toISOString(),
         endpoint: "/api/setter/approve-transfer",
+      },
+    });
+  }
+});
+
+router.post("/plot-initiate-using-names", async (req, res) => {
+  try {
+    let contract;
+    try {
+      contract = getContract();
+    } catch (error) {
+      await initializeContract();
+      contract = getContract();
+    }
+
+    const { plotName, land_info } = req.body;
+
+    // Input validation
+    if (!plotName || !Array.isArray(land_info) || land_info.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message:
+            "plotName and land_info are required. land_info must be a non-empty array",
+          details:
+            "Please provide plotName (string) and land_info (array of {blockName, parcelName, amount}).",
+          code: "INVALID_INPUT",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/plot-initiate-using-names",
+        },
+      });
+    }
+
+    // Validate land_info structure
+    for (let i = 0; i < land_info.length; i++) {
+      if (
+        !land_info[i].blockName ||
+        !land_info[i].parcelName ||
+        !land_info[i].amount
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "Invalid land_info structure",
+            details: `Each element in land_info must have 'blockName', 'parcelName', and 'amount'. Error at index ${i}`,
+            code: "INVALID_LAND_INFO_STRUCTURE",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/plot-initiate-using-names",
+          },
+        });
+      }
+    }
+
+    console.log("Fetching all land information from blockchain...");
+    const landInfoJson = await getAllLandInfo();
+    const landInfoData = JSON.parse(landInfoJson);
+
+    if (!landInfoData.success) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: "Failed to fetch land information from blockchain",
+          details: landInfoData.error,
+          code: "BLOCKCHAIN_FETCH_ERROR",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/plot-initiate-using-names",
+        },
+      });
+    }
+
+    const landInfo = landInfoData.data;
+    console.log("\nProcessing land info to find matching token IDs...");
+
+    // Arrays to store matching tokenIds and amounts
+    const matchingTokenIds = [];
+    const parcelAmounts = [];
+    const notFoundLands = [];
+
+    // Loop through each land info entry and find matching tokenIds
+    land_info.forEach((landEntry, entryIndex) => {
+      const blockName = landEntry.blockName;
+      const parcelName = landEntry.parcelName;
+      const amount = landEntry.amount;
+
+      console.log(
+        `[${entryIndex + 1}] Searching for: ${blockName} - ${parcelName}`
+      );
+
+      // Find matching tokenId
+      let found = false;
+      for (let i = 0; i < landInfo.length; i++) {
+        // Extract the land data from the nested structure
+        const landKey = Object.keys(landInfo[i])[0]; // "Land 1", "Land 2", etc.
+        const land = landInfo[i][landKey];
+
+        if (land.blockInfo === blockName && land.parcelInfo === parcelName) {
+          matchingTokenIds.push(i + 1); // TokenId is index + 1
+          parcelAmounts.push(amount); // Add corresponding amount
+          console.log(`Found tokenId: ${i + 1}`);
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        notFoundLands.push({ blockName, parcelName, amount });
+        console.log(`NOT FOUND: ${blockName} - ${parcelName}`);
+      }
+    });
+
+    // If any lands were not found, return error
+    if (notFoundLands.length > 0) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: "Some land names were not found on blockchain",
+          details: `Could not find token IDs for ${notFoundLands.length} land(s)`,
+          notFoundLands,
+          code: "LAND_NOT_FOUND",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/plot-initiate-using-names",
+        },
+      });
+    }
+
+    console.log("\n=== FOUND TOKEN IDs ===");
+    console.log(matchingTokenIds);
+
+    // Check if plot name already exists
+    try {
+      console.log("Checking if plots table exists...");
+      const tableExists = await checkPlotTableExists();
+
+      if (tableExists) {
+        console.log("Plots table exists");
+      } else {
+        console.log("Plots table does not exist");
+        console.log("Syncing plots data with blockchain...");
+        await syncPlotsWithBlockchain();
+      }
+
+      const plotExists = await checkPlotNameExists(plotName);
+      if (plotExists) {
+        return res.status(409).json({
+          success: false,
+          error: {
+            message: "Plot name already exists",
+            details: `A plot with the name '${plotName}' already exists. Please choose a different name.`,
+            code: "PLOT_NAME_EXISTS",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/plot-initiate-using-names",
+          },
+        });
+      }
+    } catch (checkError) {
+      console.error("Error checking plot name existence:", checkError.message);
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: "Failed to validate plot name",
+          details: checkError.message,
+          code: "VALIDATION_ERROR",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/plot-initiate-using-names",
+        },
+      });
+    }
+
+    // Get current plot ID before transaction
+    let beforePlotId = (await contract.getCurrentPlotAndTokenIdInfo())[0];
+    console.log("beforePlotId", beforePlotId);
+
+    // Execute contract transaction with the found token IDs
+    const tx = await contract.plotInitiate(
+      plotName,
+      matchingTokenIds,
+      parcelAmounts
+    );
+
+    // Get signer's address from the transaction
+    const callerAddress = tx.from;
+    const receipt = await tx.wait();
+
+    let plotId = Number(beforePlotId) + 1;
+    console.log("new plotId", plotId);
+
+    // Save plot data to database
+    console.log("Caller Address:", callerAddress);
+    try {
+      const plotData = {
+        plot_id: plotId,
+        plot_name: plotName,
+        current_holder: callerAddress,
+        list_of_parcels: matchingTokenIds,
+        amount: parcelAmounts,
+      };
+
+      // Validate data fields before insertion
+      const requiredFields = [
+        "plot_id",
+        "plot_name",
+        "current_holder",
+        "list_of_parcels",
+        "amount",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !plotData.hasOwnProperty(field)
+      );
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
+      }
+
+      const insertedPlot = await insertPlot(plotData);
+
+      if (!insertedPlot) {
+        throw new Error("Failed to insert plot data into database");
+      }
+
+      res.json({
+        success: true,
+        data: {
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          plotId: plotId.toString(),
+          plotName,
+          land_info,
+          matchingTokenIds,
+          parcelAmounts,
+          dbRecord: insertedPlot,
+        },
+        message:
+          "Plot initiated using land names and saved to database successfully",
+      });
+    } catch (dbError) {
+      console.error("Database plot insertion error:", dbError.message);
+      // Still return success but with warning about DB
+      res.status(207).json({
+        success: true,
+        warning: "Transaction successful but database update failed",
+        data: {
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          plotId: plotId.toString(),
+          plotName,
+          land_info,
+          matchingTokenIds,
+          parcelAmounts,
+          dbError: dbError.message,
+        },
+        message: "Plot initiated but database update failed",
+      });
+    }
+  } catch (error) {
+    console.error(
+      "Error in /api/setter/plot-initiate-using-names:",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Failed to initiate plot using land names",
+        details: error.message,
+        code: error.code,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/setter/plot-initiate-using-names",
       },
     });
   }

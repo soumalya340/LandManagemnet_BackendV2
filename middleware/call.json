@@ -537,7 +537,573 @@
           "message": "┌─────────┬────┬────────────┬─────────┬─────────┬────────────────┬────────┬───────┬────────────────┬──────────────────────────┐\n│ (index) │ id │ request_id │ plot_id │ is_plot │ land_authority │ lawyer │ bank  │ current_status │ created_at               │\n├─────────┼────┼────────────┼─────────┼─────────┼────────────────┼────────┼───────┼────────────────┼──────────────────────────┤\n│ 0       │ \u001b[33m1\u001b[39m  │ \u001b[33m2\u001b[39m          │ \u001b[33m2\u001b[39m       │ \u001b[33mtrue\u001b[39m    │ \u001b[33mtrue\u001b[39m           │ \u001b[33mfalse\u001b[39m  │ \u001b[33mfalse\u001b[39m │ \u001b[32m'IN_PROGRESS'\u001b[39m  │ \u001b[35m2025-09-19T03:46:51.239Z\u001b[39m │\n└─────────┴────┴────────────┴─────────┴─────────┴────────────────┴────────┴───────┴────────────────┴──────────────────────────┘"
         }
       ]
+    },
+    "17": {
+      "timestamp": "2025-10-03T18:21:24.663Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "1473ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-03T18:21:24.696Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "18": {
+      "timestamp": "2025-10-03T18:24:18.696Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "1423ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-03T18:24:18.729Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "19": {
+      "timestamp": "2025-10-04T05:24:36.282Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "951ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T05:24:36.309Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "20": {
+      "timestamp": "2025-10-04T13:16:35.549Z",
+      "endpoint": "GET /api/db-management/show-blockparcel",
+      "method": "GET",
+      "url": "/api/db-management/show-blockparcel",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "2866ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:16:35.558Z",
+          "message": "Checking if blockparcel table exists..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:16:37.140Z",
+          "message": "Blockparcel table exists"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:16:37.766Z",
+          "message": "📋 Data from table 'blockparcelinfo':"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:16:37.771Z",
+          "message": "┌─────────┬──────────┬──────────────┬────────────┬──────────────┬─────────────────────────────────────────┬──────────────────────────┐\n│ (index) │ token_id │ parcel_name  │ block_name │ total_supply │ metadata                                │ created_at               │\n├─────────┼──────────┼──────────────┼────────────┼──────────────┼─────────────────────────────────────────┼──────────────────────────┤\n│ 0       │ \u001b[33m5\u001b[39m        │ \u001b[32m'Parcel P2'\u001b[39m  │ \u001b[32m'Block A1'\u001b[39m │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-19T03:35:35.828Z\u001b[39m │\n│ 1       │ \u001b[33m7\u001b[39m        │ \u001b[32m'Parcel P10'\u001b[39m │ \u001b[32m'Block A1'\u001b[39m │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/10'\u001b[39m │ \u001b[35m2025-09-21T03:14:50.938Z\u001b[39m │\n│ 2       │ \u001b[33m8\u001b[39m        │ \u001b[32m'Parcel P11'\u001b[39m │ \u001b[32m'Block A1'\u001b[39m │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-21T03:49:16.657Z\u001b[39m │\n│ 3       │ \u001b[33m9\u001b[39m        │ \u001b[32m'15'\u001b[39m         │ \u001b[32m'6986'\u001b[39m     │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-21T08:29:39.166Z\u001b[39m │\n│ 4       │ \u001b[33m10\u001b[39m       │ \u001b[32m'16'\u001b[39m         │ \u001b[32m'6896'\u001b[39m     │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-25T01:04:10.508Z\u001b[39m │\n└─────────┴──────────┴──────────────┴────────────┴──────────────┴─────────────────────────────────────────┴──────────────────────────┘"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:16:38.409Z",
+          "message": "📋 Data from table 'blockparcelinfo':"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:16:38.410Z",
+          "message": "┌─────────┬──────────┬──────────────┬────────────┬──────────────┬─────────────────────────────────────────┬──────────────────────────┐\n│ (index) │ token_id │ parcel_name  │ block_name │ total_supply │ metadata                                │ created_at               │\n├─────────┼──────────┼──────────────┼────────────┼──────────────┼─────────────────────────────────────────┼──────────────────────────┤\n│ 0       │ \u001b[33m5\u001b[39m        │ \u001b[32m'Parcel P2'\u001b[39m  │ \u001b[32m'Block A1'\u001b[39m │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-19T03:35:35.828Z\u001b[39m │\n│ 1       │ \u001b[33m7\u001b[39m        │ \u001b[32m'Parcel P10'\u001b[39m │ \u001b[32m'Block A1'\u001b[39m │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/10'\u001b[39m │ \u001b[35m2025-09-21T03:14:50.938Z\u001b[39m │\n│ 2       │ \u001b[33m8\u001b[39m        │ \u001b[32m'Parcel P11'\u001b[39m │ \u001b[32m'Block A1'\u001b[39m │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-21T03:49:16.657Z\u001b[39m │\n│ 3       │ \u001b[33m9\u001b[39m        │ \u001b[32m'15'\u001b[39m         │ \u001b[32m'6986'\u001b[39m     │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-21T08:29:39.166Z\u001b[39m │\n│ 4       │ \u001b[33m10\u001b[39m       │ \u001b[32m'16'\u001b[39m         │ \u001b[32m'6896'\u001b[39m     │ \u001b[33m1000\u001b[39m         │ \u001b[32m'https://example.com/token/metadata/1'\u001b[39m  │ \u001b[35m2025-09-25T01:04:10.508Z\u001b[39m │\n└─────────┴──────────┴──────────────┴────────────┴──────────────┴─────────────────────────────────────────┴──────────────────────────┘"
+        }
+      ]
+    },
+    "21": {
+      "timestamp": "2025-10-04T13:22:03.669Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "1128ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:22:03.713Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "22": {
+      "timestamp": "2025-10-04T13:22:34.872Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "652ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-04T13:22:34.910Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "23": {
+      "timestamp": "2025-10-05T12:50:26.684Z",
+      "endpoint": "POST /api/setter/plot-initiate-using-names",
+      "method": "POST",
+      "url": "/api/setter/plot-initiate-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "131",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "plotName": "Plot 7",
+        "land_info": [
+          {
+            "blockName": "6896",
+            "parcelName": "16",
+            "amount": 1
+          }
+        ]
+      },
+      "statusCode": 404,
+      "duration": "1542ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:50:26.713Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:50:26.719Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:50:28.225Z",
+          "message": "\nProcessing land info to find matching token IDs..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:50:28.225Z",
+          "message": "[1] Searching for: 6896 - 16"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:50:28.225Z",
+          "message": "NOT FOUND: 6896 - 16"
+        }
+      ]
+    },
+    "24": {
+      "timestamp": "2025-10-05T12:51:11.752Z",
+      "endpoint": "POST /api/setter/plot-initiate-using-names",
+      "method": "POST",
+      "url": "/api/setter/plot-initiate-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "131",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "plotName": "Plot 7",
+        "land_info": [
+          {
+            "blockName": "6896",
+            "parcelName": "15",
+            "amount": 1
+          }
+        ]
+      },
+      "statusCode": 404,
+      "duration": "2953ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:11.778Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:11.782Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:14.704Z",
+          "message": "\nProcessing land info to find matching token IDs..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:14.704Z",
+          "message": "[1] Searching for: 6896 - 15"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:14.704Z",
+          "message": "NOT FOUND: 6896 - 15"
+        }
+      ]
+    },
+    "25": {
+      "timestamp": "2025-10-05T12:51:21.216Z",
+      "endpoint": "POST /api/setter/plot-initiate-using-names",
+      "method": "POST",
+      "url": "/api/setter/plot-initiate-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "131",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "plotName": "Plot 7",
+        "land_info": [
+          {
+            "blockName": "6896",
+            "parcelName": "15",
+            "amount": 1
+          }
+        ]
+      },
+      "statusCode": 404,
+      "duration": "515ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:21.245Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:21.250Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:21.730Z",
+          "message": "\nProcessing land info to find matching token IDs..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:21.730Z",
+          "message": "[1] Searching for: 6896 - 15"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:51:21.730Z",
+          "message": "NOT FOUND: 6896 - 15"
+        }
+      ]
+    },
+    "26": {
+      "timestamp": "2025-10-05T12:53:36.585Z",
+      "endpoint": "POST /api/setter/plot-initiate-using-names",
+      "method": "POST",
+      "url": "/api/setter/plot-initiate-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "131",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "plotName": "Plot 7",
+        "land_info": [
+          {
+            "blockName": "6986",
+            "parcelName": "15",
+            "amount": 1
+          }
+        ]
+      },
+      "statusCode": 404,
+      "duration": "1492ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:53:36.615Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:53:36.619Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:53:38.076Z",
+          "message": "\nProcessing land info to find matching token IDs..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:53:38.076Z",
+          "message": "[1] Searching for: 6986 - 15"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:53:38.076Z",
+          "message": "NOT FOUND: 6986 - 15"
+        }
+      ]
+    },
+    "27": {
+      "timestamp": "2025-10-05T12:55:02.526Z",
+      "endpoint": "POST /api/setter/plot-initiate-using-names",
+      "method": "POST",
+      "url": "/api/setter/plot-initiate-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "131",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "plotName": "Plot 7",
+        "land_info": [
+          {
+            "blockName": "6986",
+            "parcelName": "15",
+            "amount": 1
+          }
+        ]
+      },
+      "statusCode": 500,
+      "duration": "3963ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:02.566Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:02.575Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:03.432Z",
+          "message": "\nProcessing land info to find matching token IDs..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:03.432Z",
+          "message": "[1] Searching for: 6986 - 15"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:03.432Z",
+          "message": "Found tokenId: 9"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:03.432Z",
+          "message": "\n=== FOUND TOKEN IDs ==="
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:03.432Z",
+          "message": "[9]"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:03.433Z",
+          "message": "Checking if plots table exists..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:05.018Z",
+          "message": "Plots table exists"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:55:05.702Z",
+          "message": "beforePlotId 6"
+        },
+        {
+          "type": "error",
+          "timestamp": "2025-10-05T12:55:06.486Z",
+          "message": "Error in /api/setter/plot-initiate-using-names: execution reverted: \"Not enough balance\" (action=\"estimateGas\", data=\"0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000124e6f7420656e6f7567682062616c616e63650000000000000000000000000000\", reason=\"Not enough balance\", transaction={ \"data\": \"0xab3fdd2b000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000006506c6f74203700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001\", \"from\": \"0x6e6C0a0634D184DAaC91e2B28ceF2131871e79FE\", \"to\": \"0x12b88B7C77B0D91eBd2034E434a14c02d9558779\" }, invocation=null, revert={ \"args\": [ \"Not enough balance\" ], \"name\": \"Error\", \"signature\": \"Error(string)\" }, code=CALL_EXCEPTION, version=6.15.0)"
+        }
+      ]
+    },
+    "28": {
+      "timestamp": "2025-10-05T12:58:37.353Z",
+      "endpoint": "POST /api/setter/plot-initiate-using-names",
+      "method": "POST",
+      "url": "/api/setter/plot-initiate-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "131",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "plotName": "Plot 7",
+        "land_info": [
+          {
+            "blockName": "6896",
+            "parcelName": "16",
+            "amount": 1
+          }
+        ]
+      },
+      "statusCode": 200,
+      "duration": "8232ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:37.399Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:37.406Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:38.296Z",
+          "message": "\nProcessing land info to find matching token IDs..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:38.296Z",
+          "message": "[1] Searching for: 6896 - 16"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:38.296Z",
+          "message": "Found tokenId: 10"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:38.296Z",
+          "message": "\n=== FOUND TOKEN IDs ==="
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:38.296Z",
+          "message": "[10]"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:38.296Z",
+          "message": "Checking if plots table exists..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:39.819Z",
+          "message": "Plots table exists"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:40.487Z",
+          "message": "beforePlotId 6"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:44.350Z",
+          "message": "new plotId 7"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:44.350Z",
+          "message": "Caller Address: 0x6e6C0a0634D184DAaC91e2B28ceF2131871e79FE"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:45.265Z",
+          "message": "Expected fields: 5"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:45.265Z",
+          "message": "Actual fields: 5"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:45.265Z",
+          "message": "Fields present: [\"plot_id\",\"plot_name\",\"current_holder\",\"list_of_parcels\",\"amount\"]"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-05T12:58:45.581Z",
+          "message": " Plot inserted: {\"plot_id\":7,\"plot_name\":\"Plot 7\",\"current_holder\":\"0x6e6C0a0634D184DAaC91e2B28ceF2131871e79FE\",\"list_of_parcels\":[10],\"amount\":[1],\"created_at\":\"2025-10-05T07:28:44.260Z\"}"
+        }
+      ]
     }
   },
-  "counter": 16
+  "counter": 28
 }

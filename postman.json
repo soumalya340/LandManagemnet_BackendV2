@@ -1,13 +1,13 @@
 {
   "info": {
-    "name": "Land Management API",
+    "name": "Land Management API V2",
     "description": "Complete API collection for Land Management System with Blockchain Integration",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8000",
+      "value": "http://99.81.54.249:3000",
       "type": "string"
     }
   ],
@@ -119,6 +119,27 @@
               "path": ["api", "setter", "plot-initiate"]
             }
           }
+        },
+        {
+          "name": "6. Initiate Plot Using Land Names",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plotName\": \"Plot 7\",\n  \"land_info\": [\n    {\n      \"blockName\": \"Block 1\",\n      \"parcelName\": \"Parcel 3\",\n      \"amount\": 100\n    },\n    {\n      \"blockName\": \"Block 1\",\n      \"parcelName\": \"Parcel 4\",\n      \"amount\": 150\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/setter/plot-initiate-using-names",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "setter", "plot-initiate-using-names"]
+            }
+          }
         }
       ]
     },
@@ -126,7 +147,7 @@
       "name": "Blockchain Get Calls - Land",
       "item": [
         {
-          "name": "6. Get Plot and Token ID Info",
+          "name": "7. Get Plot and Token ID Info",
           "request": {
             "method": "GET",
             "header": [],
@@ -138,7 +159,7 @@
           }
         },
         {
-          "name": "7. Get Token URI",
+          "name": "8. Get Token URI",
           "request": {
             "method": "GET",
             "header": [],
@@ -150,7 +171,7 @@
           }
         },
         {
-          "name": "8. Get Land Information",
+          "name": "9. Get Land Information",
           "request": {
             "method": "GET",
             "header": [],
@@ -162,7 +183,7 @@
           }
         },
         {
-          "name": "9. Get Plot Account Information",
+          "name": "10. Get Plot Account Information",
           "request": {
             "method": "GET",
             "header": [],
@@ -174,7 +195,7 @@
           }
         },
         {
-          "name": "10. Get Transfer Request Status",
+          "name": "11. Get Transfer Request Status",
           "request": {
             "method": "GET",
             "header": [],
@@ -186,7 +207,7 @@
           }
         },
         {
-          "name": "11. Get All Plots Information",
+          "name": "12. Get All Plots Information",
           "request": {
             "method": "GET",
             "header": [],
@@ -198,7 +219,7 @@
           }
         },
         {
-          "name": "12. Get All Land Information",
+          "name": "13. Get All Land Information",
           "request": {
             "method": "GET",
             "header": [],
@@ -210,7 +231,7 @@
           }
         },
         {
-          "name": "13. Get All Transfer Requests",
+          "name": "14. Get All Transfer Requests",
           "request": {
             "method": "GET",
             "header": [],
@@ -227,7 +248,7 @@
       "name": "Blockchain Get Calls - Plot",
       "item": [
         {
-          "name": "14. Get Plot Parcel Shareholders",
+          "name": "15. Get Plot Parcel Shareholders",
           "request": {
             "method": "GET",
             "header": [],
@@ -239,7 +260,7 @@
           }
         },
         {
-          "name": "15. Get User Shares in Plot Parcel",
+          "name": "16. Get User Shares in Plot Parcel",
           "request": {
             "method": "GET",
             "header": [],
@@ -251,7 +272,7 @@
           }
         },
         {
-          "name": "16. Get Plot Parcel Total Shares",
+          "name": "17. Get Plot Parcel Total Shares",
           "request": {
             "method": "GET",
             "header": [],
@@ -263,7 +284,7 @@
           }
         },
         {
-          "name": "17. Get User Parcels in Plot",
+          "name": "18. Get User Parcels in Plot",
           "request": {
             "method": "GET",
             "header": [],
@@ -275,7 +296,7 @@
           }
         },
         {
-          "name": "18. Get User Ownership Percentage in Plot",
+          "name": "19. Get User Ownership Percentage in Plot",
           "request": {
             "method": "GET",
             "header": [],
@@ -292,7 +313,7 @@
       "name": "Database Calls",
       "item": [
         {
-          "name": "19. Database Health Check",
+          "name": "20. Database Health Check",
           "request": {
             "method": "GET",
             "header": [],
@@ -304,7 +325,7 @@
           }
         },
         {
-          "name": "20. Show Plots Table Data",
+          "name": "21. Show Plots Table Data",
           "request": {
             "method": "GET",
             "header": [],
@@ -316,7 +337,7 @@
           }
         },
         {
-          "name": "21. Show Block Parcel Table Data",
+          "name": "22. Show Block Parcel Table Data",
           "request": {
             "method": "GET",
             "header": [],
@@ -328,7 +349,7 @@
           }
         },
         {
-          "name": "22. Show Request Table Data",
+          "name": "23. Show Request Table Data",
           "request": {
             "method": "GET",
             "header": [],
@@ -340,7 +361,7 @@
           }
         },
         {
-          "name": "23. Get Plot by Name",
+          "name": "24. Get Plot by Name",
           "request": {
             "method": "GET",
             "header": [],
@@ -352,7 +373,7 @@
           }
         },
         {
-          "name": "24. Get Specific Block and Parcel by Name",
+          "name": "25. Get Specific Block and Parcel by Name",
           "request": {
             "method": "GET",
             "header": [],
@@ -369,7 +390,7 @@
       "name": "Misc Calls",
       "item": [
         {
-          "name": "25. API Health Check",
+          "name": "26. API Health Check",
           "request": {
             "method": "GET",
             "header": [],
@@ -381,7 +402,7 @@
           }
         },
         {
-          "name": "26. View API Call Logs",
+          "name": "27. View API Call Logs",
           "request": {
             "method": "GET",
             "header": [],

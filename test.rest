@@ -10,6 +10,9 @@ GET http://localhost:8000/api/getter/all-transfer-requests
 ### View API Call Logs
 GET http://localhost:8000/api/logs
 
+### Get All Block Parcel Info
+GET http://localhost:8000/api/db-management/show-blockparcel
+
 ### Test Plot Transfer Request
 POST http://localhost:8000/api/setter/request-plot-transfer
 Content-Type: application/json
@@ -17,4 +20,19 @@ Content-Type: application/json
 {
   "plotId": 1,
   "to": "0x0987654321098765432109876543210987654321"
+}
+
+### Test Plot Initiate Using Names
+POST http://localhost:8000/api/setter/plot-initiate-using-names
+Content-Type: application/json
+
+{
+  "plotName": "Plot 7",
+  "land_info": [
+    {
+      "blockName": "6896",
+      "parcelName": "16",
+      "amount": 1
+    }
+  ]
 }
