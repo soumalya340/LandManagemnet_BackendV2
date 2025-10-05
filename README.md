@@ -27,8 +27,13 @@
    - Approve transfer as delegated authority
 
 5. Initiate a New Plot
+
    - `/api/setter/plot-initiate`
    - Create new plot with parcel IDs and amounts
+
+6. Initiate Plot Using Land Names
+   - `/api/setter/plot-initiate-using-names`
+   - Create new plot using block and parcel names instead of IDs
 
 ## GET Endpoints
 
@@ -353,6 +358,117 @@ Content-Type: application/json
     "parcelAmounts": [1000, 800, 1200]
   },
   "message": "Plot initiated successfully"
+}
+```
+
+---
+
+## 6. Initiate Plot Using Land Names
+
+**Why/When:** Use this to initiate a new plot using human-readable block and parcel names instead of token IDs. The system automatically finds matching token IDs from the blockchain based on the provided names. This is more user-friendly than using numeric IDs.
+
+**Key Features:**
+
+- Automatically resolves block and parcel names to token IDs
+- Validates that all land names exist on the blockchain
+- Checks for duplicate plot names
+- Returns detailed error messages if any lands are not found
+
+```
+POST http://localhost:8000/api/setter/plot-initiate-using-names
+Content-Type: application/json
+
+{
+  "plotName": "Plot 7",
+  "land_info": [
+    {
+      "blockName": "Block 1",
+      "parcelName": "Parcel 3",
+      "amount": 100
+    },
+    {
+      "blockName": "Block 1",
+      "parcelName": "Parcel 4",
+      "amount": 150
+    }
+  ]
+}
+```
+
+**Request Body Parameters:**
+
+- `plotName` (string, required): Name for the new plot
+- `land_info` (array, required): Array of land information objects
+  - `blockName` (string, required): Name of the block
+  - `parcelName` (string, required): Name of the parcel
+  - `amount` (number, required): Amount/quantity of tokens from this parcel
+
+**Conditions & Restrictions:**
+
+- All block and parcel name combinations must exist on the blockchain
+- The caller must have sufficient token balance for the specified amounts
+- Plot name must be unique (not already exist)
+- `land_info` array must contain at least one entry
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "transaction": {
+      "hash": "0xa4328f87d58e2bde7a43d377685772481fc172b427d42c53e99320e1926d55f0",
+      "gasUsed": "783615",
+      "status": 1
+    },
+    "plotId": "7",
+    "plotName": "Plot 7",
+    "land_info": [
+      {
+        "blockName": "Block 1",
+        "parcelName": "Parcel 3",
+        "amount": 100
+      },
+      {
+        "blockName": "Block 1",
+        "parcelName": "Parcel 4",
+        "amount": 150
+      }
+    ],
+    "matchingTokenIds": [3, 4],
+    "parcelAmounts": [100, 150],
+    "dbRecord": {
+      "plot_id": 7,
+      "plot_name": "Plot 7",
+      "current_holder": "0x6e6C0a0634D184DAaC91e2B28ceF2131871e79FE",
+      "list_of_parcels": [3, 4],
+      "amount": [100, 150],
+      "created_at": "2025-10-05T07:28:44.260Z"
+    }
+  },
+  "message": "Plot initiated using land names and saved to database successfully"
+}
+```
+
+**Error Response (Land Not Found):**
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Some land names were not found on blockchain",
+    "details": "Could not find token IDs for 1 land(s)",
+    "notFoundLands": [
+      {
+        "blockName": "Block 99",
+        "parcelName": "Parcel 99",
+        "amount": 100
+      }
+    ],
+    "code": "LAND_NOT_FOUND",
+    "timestamp": "2025-10-05T12:51:21.730Z",
+    "endpoint": "/api/setter/plot-initiate-using-names"
+  }
 }
 ```
 
@@ -1116,11 +1232,11 @@ Content-Type: application/json
 
 # Complete Endpoint Summary
 
-## Total Endpoints: 21
+## Total Endpoints: 22
 
 ### By Category:
 
-- **Setter Endpoints (Blockchain Writes):** 5
+- **Setter Endpoints (Blockchain Writes):** 6
 - **Blockchain Get Calls - Land:** 8
 - **Blockchain Get Calls - Plot:** 5
 - **Database Management:** 6
@@ -1129,6 +1245,6 @@ Content-Type: application/json
 ### By HTTP Method:
 
 - **GET:** 19 endpoints
-- **POST:** 5 endpoints
+- **POST:** 6 endpoints
 
 ---
