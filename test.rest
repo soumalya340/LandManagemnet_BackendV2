@@ -36,3 +36,26 @@ Content-Type: application/json
     }
   ]
 }
+
+### Test Request Whole Plot Transfer Using Name
+POST http://localhost:8000/api/setter/request-transfer-using-names
+Content-Type: application/json
+
+{
+  "transferPlot": true,
+  "plotName": "Plot 8",
+  "to": "0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+}
+
+### Test Request Parcel Transfer Using Names
+POST http://localhost:8000/api/setter/request-transfer-using-names
+Content-Type: application/json
+
+{
+  "transferPlot": false,
+  "blockName": "Block A1",
+  "parcelName": "Parcel P2",
+  "parcelAmount": 1,
+  "plotName": "Soumalya Plot 1",
+  "to": "0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+}

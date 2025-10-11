@@ -26,6 +26,7 @@ const {
   getRequestStatus,
   getPlotOwner,
   getAllLandInfo,
+  getAllPlotAccountInfo,
 } = require("../utils/info");
 
 const router = express.Router();
@@ -594,6 +595,375 @@ router.post("/approve-transfer-execution", async (req, res) => {
         details: error.message,
         timestamp: new Date().toISOString(),
         endpoint: "/api/setter/approve-transfer",
+      },
+    });
+  }
+});
+
+router.post("/request-transfer-using-names", async (req, res) => {
+  try {
+    let contract;
+    try {
+      contract = getContract();
+    } catch (error) {
+      await initializeContract();
+      contract = getContract();
+    }
+
+    const { transferPlot, blockName, parcelName, parcelAmount, to, plotName } =
+      req.body;
+
+    // Validate recipient address
+    if (!to || !/^0x[a-fA-F0-9]{40}$/.test(to)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: "Valid recipient address is required",
+          details: "Please provide a valid Ethereum address in 'to' field",
+          code: "INVALID_ADDRESS",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/request-transfer-using-names",
+        },
+      });
+    }
+
+    // Validate transferPlot flag
+    if (typeof transferPlot !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: "transferPlot must be a boolean value",
+          details:
+            "Please provide true for plot transfer or false for parcel transfer",
+          code: "INVALID_INPUT",
+          timestamp: new Date().toISOString(),
+          endpoint: "/api/setter/request-transfer-using-names",
+        },
+      });
+    }
+
+    let plotId, parcelId, requestId;
+
+    // Handle whole plot transfer
+    if (transferPlot) {
+      // Validate plotName is provided
+      if (!plotName) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "plotName is required for plot transfer",
+            details: "Please provide the plot name when transferPlot is true",
+            code: "MISSING_PLOT_NAME",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      console.log("Fetching all plots information from blockchain...");
+      const plotInfoJson = await getAllPlotAccountInfo();
+      const plotInfoData = JSON.parse(plotInfoJson);
+
+      if (!plotInfoData.success) {
+        return res.status(500).json({
+          success: false,
+          error: {
+            message: "Failed to fetch plot information from blockchain",
+            details: plotInfoData.error,
+            code: "BLOCKCHAIN_FETCH_ERROR",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      // Find matching plot by name
+      const plotInfo = plotInfoData.data;
+      let foundPlot = false;
+
+      for (let i = 0; i < plotInfo.length; i++) {
+        const plotKey = Object.keys(plotInfo[i])[0];
+        const plot = plotInfo[i][plotKey];
+
+        if (plot.plotName === plotName) {
+          plotId = i + 1; // Plot ID is index + 1
+          foundPlot = true;
+          console.log(`Found plot: ${plotName} with ID: ${plotId}`);
+          break;
+        }
+      }
+
+      if (!foundPlot) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            message: "Plot name not found on blockchain",
+            details: `No plot found with name '${plotName}'`,
+            code: "PLOT_NOT_FOUND",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      // Execute whole plot transfer request
+      console.log(`Requesting whole plot transfer for plot ${plotId} to ${to}`);
+      const tx = await contract.requestForWholePlotTransfer(plotId, to);
+      const receipt = await tx.wait();
+
+      // Parse events to get request ID
+      for (const log of receipt.logs) {
+        try {
+          const parsed = contract.interface.parseLog(log);
+          if (parsed.name === "TransferRequestCreated") {
+            requestId = parsed.args.requestId.toString();
+            break;
+          }
+        } catch (e) {
+          // Skip unparseable logs
+        }
+      }
+
+      // Save request to database
+      try {
+        console.log("Checking if request table exists...");
+        const tableExists = await checkRequestTableExists();
+
+        if (!tableExists) {
+          console.log("Request table does not exist. Syncing...");
+          await syncRequestsWithBlockchain();
+        }
+
+        await insertRequest({
+          request_id: parseInt(requestId),
+          plot_id: parseInt(plotId),
+          is_plot: true,
+          land_authority: false,
+          lawyer: false,
+          bank: false,
+          current_status: "PENDING",
+        });
+        console.log("Request inserted into database:", requestId);
+      } catch (dbError) {
+        console.error("Database error:", dbError.message);
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          requestId,
+          transferType: "PLOT_TRANSFER",
+          plotName,
+          plotId: plotId.toString(),
+          to,
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          confirmedAt: new Date().toISOString(),
+        },
+        message: "Plot transfer request created successfully using plot name",
+      });
+    }
+    // Handle parcel transfer
+    else {
+      // Validate required fields for parcel transfer
+      if (!blockName || !parcelName || !parcelAmount || !plotName) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "Missing required fields for parcel transfer",
+            details:
+              "Please provide blockName, parcelName, parcelAmount, and plotName when transferPlot is false",
+            code: "MISSING_PARCEL_INFO",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      console.log("Fetching all land information from blockchain...");
+      const landInfoJson = await getAllLandInfo();
+      const landInfoData = JSON.parse(landInfoJson);
+
+      if (!landInfoData.success) {
+        return res.status(500).json({
+          success: false,
+          error: {
+            message: "Failed to fetch land information from blockchain",
+            details: landInfoData.error,
+            code: "BLOCKCHAIN_FETCH_ERROR",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      // Find matching parcel by block and parcel name
+      const landInfo = landInfoData.data;
+      let foundParcel = false;
+
+      for (let i = 0; i < landInfo.length; i++) {
+        const landKey = Object.keys(landInfo[i])[0];
+        const land = landInfo[i][landKey];
+
+        if (land.blockInfo === blockName && land.parcelInfo === parcelName) {
+          parcelId = i + 1; // Token ID is index + 1
+          foundParcel = true;
+          console.log(
+            `Found parcel: ${blockName} - ${parcelName} with ID: ${parcelId}`
+          );
+          break;
+        }
+      }
+
+      if (!foundParcel) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            message: "Parcel not found on blockchain",
+            details: `No parcel found with blockName '${blockName}' and parcelName '${parcelName}'`,
+            code: "PARCEL_NOT_FOUND",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      // Find plot ID by plot name
+      console.log("Fetching plot information...");
+      const plotInfoJson = await getAllPlotAccountInfo();
+      const plotInfoData = JSON.parse(plotInfoJson);
+
+      if (!plotInfoData.success) {
+        return res.status(500).json({
+          success: false,
+          error: {
+            message: "Failed to fetch plot information from blockchain",
+            details: plotInfoData.error,
+            code: "BLOCKCHAIN_FETCH_ERROR",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      const plotInfo = plotInfoData.data;
+      let foundPlot = false;
+
+      for (let i = 0; i < plotInfo.length; i++) {
+        const plotKey = Object.keys(plotInfo[i])[0];
+        const plot = plotInfo[i][plotKey];
+
+        if (plot.plotName === plotName) {
+          plotId = i + 1;
+          foundPlot = true;
+          console.log(`Found plot: ${plotName} with ID: ${plotId}`);
+          break;
+        }
+      }
+
+      if (!foundPlot) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            message: "Plot name not found on blockchain",
+            details: `No plot found with name '${plotName}'`,
+            code: "PLOT_NOT_FOUND",
+            timestamp: new Date().toISOString(),
+            endpoint: "/api/setter/request-transfer-using-names",
+          },
+        });
+      }
+
+      // Execute parcel transfer request
+      console.log(
+        `Requesting parcel transfer for parcel ${parcelId}, amount ${parcelAmount}, plot ${plotId} to ${to}`
+      );
+      const tx = await contract.requestForParcelTransfer(
+        parcelId,
+        parcelAmount,
+        to,
+        plotId
+      );
+      const receipt = await tx.wait();
+
+      // Parse events to get request ID
+      for (const log of receipt.logs) {
+        try {
+          const parsed = contract.interface.parseLog(log);
+          if (parsed.name === "TransferRequestCreated") {
+            requestId = parsed.args.requestId.toString();
+            break;
+          }
+        } catch (e) {
+          // Skip unparseable logs
+        }
+      }
+
+      // Save request to database
+      try {
+        console.log("Checking if request table exists...");
+        const tableExists = await checkRequestTableExists();
+
+        if (!tableExists) {
+          console.log("Request table does not exist. Syncing...");
+          await syncRequestsWithBlockchain();
+        }
+
+        await insertRequest({
+          request_id: parseInt(requestId),
+          plot_id: parseInt(plotId),
+          is_plot: false,
+          land_authority: false,
+          lawyer: false,
+          bank: false,
+          current_status: "PENDING",
+        });
+        console.log(
+          "Parcel transfer request inserted into database:",
+          requestId
+        );
+      } catch (dbError) {
+        console.error("Database error:", dbError.message);
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          requestId,
+          transferType: "PARCEL_TRANSFER",
+          blockName,
+          parcelName,
+          parcelId: parcelId.toString(),
+          parcelAmount,
+          plotName,
+          plotId: plotId.toString(),
+          to,
+          transaction: {
+            hash: tx.hash,
+            gasUsed: receipt.gasUsed?.toString(),
+            status: receipt.status,
+          },
+          confirmedAt: new Date().toISOString(),
+        },
+        message: "Parcel transfer request created successfully using names",
+      });
+    }
+  } catch (error) {
+    console.error(
+      "Error in /api/setter/request-transfer-using-names:",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Failed to create transfer request using names",
+        details: error.message,
+        code: error.code,
+        timestamp: new Date().toISOString(),
+        endpoint: "/api/setter/request-transfer-using-names",
       },
     });
   }

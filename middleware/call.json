@@ -1103,7 +1103,433 @@
           "message": " Plot inserted: {\"plot_id\":7,\"plot_name\":\"Plot 7\",\"current_holder\":\"0x6e6C0a0634D184DAaC91e2B28ceF2131871e79FE\",\"list_of_parcels\":[10],\"amount\":[1],\"created_at\":\"2025-10-05T07:28:44.260Z\"}"
         }
       ]
+    },
+    "29": {
+      "timestamp": "2025-10-11T12:00:19.471Z",
+      "endpoint": "GET /api/getter/all-plots-info",
+      "method": "GET",
+      "url": "/api/getter/all-plots-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "912ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:00:19.502Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "30": {
+      "timestamp": "2025-10-11T12:01:34.814Z",
+      "endpoint": "POST /api/setter/request-transfer-using-names",
+      "method": "POST",
+      "url": "/api/setter/request-transfer-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "104",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "transferPlot": true,
+        "plotName": "Plot 8",
+        "to": "0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+      },
+      "statusCode": 200,
+      "duration": "6084ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:01:34.846Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:01:34.852Z",
+          "message": "Fetching all plots information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:01:35.683Z",
+          "message": "Found plot: Plot 8 with ID: 8"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:01:35.683Z",
+          "message": "Requesting whole plot transfer for plot 8 to 0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:01:39.234Z",
+          "message": "Checking if request table exists..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:01:40.895Z",
+          "message": "Record inserted into request table successfully"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:01:40.896Z",
+          "message": "Request inserted into database: 4"
+        }
+      ]
+    },
+    "31": {
+      "timestamp": "2025-10-11T12:02:23.808Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "851ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:02:23.852Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "32": {
+      "timestamp": "2025-10-11T12:02:42.851Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "743ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:02:42.889Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "33": {
+      "timestamp": "2025-10-11T12:02:49.320Z",
+      "endpoint": "GET /api/getter/all-plots-info",
+      "method": "GET",
+      "url": "/api/getter/all-plots-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "744ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:02:49.357Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "34": {
+      "timestamp": "2025-10-11T12:04:07.053Z",
+      "endpoint": "GET /api/getter/all-land-info",
+      "method": "GET",
+      "url": "/api/getter/all-land-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "773ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:04:07.087Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "35": {
+      "timestamp": "2025-10-11T12:04:39.334Z",
+      "endpoint": "POST /api/setter/request-transfer-using-names",
+      "method": "POST",
+      "url": "/api/setter/request-transfer-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "182",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "transferPlot": false,
+        "blockName": "Block A1",
+        "parcelName": "Parcel P2",
+        "parcelAmount": 1,
+        "plotName": "Plot 5",
+        "to": "0x0987654321098765432109876543210987654321"
+      },
+      "statusCode": 404,
+      "duration": "1120ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:04:39.357Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:04:39.361Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:04:40.000Z",
+          "message": "Found parcel: Block A1 - Parcel P2 with ID: 5"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:04:40.001Z",
+          "message": "Fetching plot information..."
+        }
+      ]
+    },
+    "36": {
+      "timestamp": "2025-10-11T12:04:51.750Z",
+      "endpoint": "GET /api/getter/all-plots-info",
+      "method": "GET",
+      "url": "/api/getter/all-plots-info",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "639ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:04:51.775Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "37": {
+      "timestamp": "2025-10-11T12:05:13.515Z",
+      "endpoint": "POST /api/setter/request-transfer-using-names",
+      "method": "POST",
+      "url": "/api/setter/request-transfer-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "191",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "transferPlot": false,
+        "blockName": "Block A1",
+        "parcelName": "Parcel P2",
+        "parcelAmount": 1,
+        "plotName": "Soumalya Plot 1",
+        "to": "0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+      },
+      "statusCode": 200,
+      "duration": "6305ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:13.546Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:13.551Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:14.229Z",
+          "message": "Found parcel: Block A1 - Parcel P2 with ID: 5"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:14.229Z",
+          "message": "Fetching plot information..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:14.682Z",
+          "message": "Found plot: Soumalya Plot 1 with ID: 5"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:14.682Z",
+          "message": "Requesting parcel transfer for parcel 5, amount 1, plot 5 to 0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:18.071Z",
+          "message": "Checking if request table exists..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:19.817Z",
+          "message": "Record inserted into request table successfully"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:19.818Z",
+          "message": "Parcel transfer request inserted into database: 5"
+        }
+      ]
+    },
+    "38": {
+      "timestamp": "2025-10-11T12:05:36.236Z",
+      "endpoint": "GET /api/getter/all-transfer-requests",
+      "method": "GET",
+      "url": "/api/getter/all-transfer-requests",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "921ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:05:36.274Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
+    },
+    "39": {
+      "timestamp": "2025-10-11T12:06:11.161Z",
+      "endpoint": "POST /api/setter/request-transfer-using-names",
+      "method": "POST",
+      "url": "/api/setter/request-transfer-using-names",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "content-type": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-length": "191",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "body": {
+        "transferPlot": false,
+        "blockName": "Block A1",
+        "parcelName": "Parcel P2",
+        "parcelAmount": 1,
+        "plotName": "Soumalya Plot 1",
+        "to": "0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+      },
+      "statusCode": 200,
+      "duration": "6070ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:11.192Z",
+          "message": "Loading contract ABI from file..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:11.201Z",
+          "message": "Fetching all land information from blockchain..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:11.949Z",
+          "message": "Found parcel: Block A1 - Parcel P2 with ID: 5"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:11.949Z",
+          "message": "Fetching plot information..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:12.330Z",
+          "message": "Found plot: Soumalya Plot 1 with ID: 5"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:12.330Z",
+          "message": "Requesting parcel transfer for parcel 5, amount 1, plot 5 to 0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:15.514Z",
+          "message": "Checking if request table exists..."
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:17.230Z",
+          "message": "Record inserted into request table successfully"
+        },
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:17.230Z",
+          "message": "Parcel transfer request inserted into database: 6"
+        }
+      ]
+    },
+    "40": {
+      "timestamp": "2025-10-11T12:06:25.511Z",
+      "endpoint": "GET /api/getter/all-transfer-requests",
+      "method": "GET",
+      "url": "/api/getter/all-transfer-requests",
+      "headers": {
+        "user-agent": "vscode-restclient",
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8000",
+        "connection": "close"
+      },
+      "query": {},
+      "statusCode": 200,
+      "duration": "811ms",
+      "consoleLogs": [
+        {
+          "type": "log",
+          "timestamp": "2025-10-11T12:06:25.546Z",
+          "message": "Loading contract ABI from file..."
+        }
+      ]
     }
   },
-  "counter": 28
+  "counter": 40
 }

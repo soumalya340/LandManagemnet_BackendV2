@@ -32,8 +32,13 @@
    - Create new plot with parcel IDs and amounts
 
 6. Initiate Plot Using Land Names
+
    - `/api/setter/plot-initiate-using-names`
    - Create new plot using block and parcel names instead of IDs
+
+7. Request Transfer Using Names
+   - `/api/setter/request-transfer-using-names`
+   - Request plot or parcel transfer using human-readable names
 
 ## GET Endpoints
 
@@ -468,6 +473,158 @@ Content-Type: application/json
     "code": "LAND_NOT_FOUND",
     "timestamp": "2025-10-05T12:51:21.730Z",
     "endpoint": "/api/setter/plot-initiate-using-names"
+  }
+}
+```
+
+---
+
+## 7. Request Transfer Using Names
+
+**Why/When:** Use this unified endpoint to request either a whole plot transfer or a parcel transfer using human-readable names instead of numeric IDs. This makes transfer requests more user-friendly by eliminating the need to manually look up IDs.
+
+**Key Features:**
+
+- Handles both plot and parcel transfers in one endpoint
+- Automatically resolves plot and land names to IDs
+- Validates all names exist on blockchain before processing
+- Returns detailed error messages if any names are not found
+
+**Transfer Types:**
+
+- **Plot Transfer** (`transferPlot: true`): Transfer entire plot ownership
+- **Parcel Transfer** (`transferPlot: false`): Transfer specific parcel amount within a plot
+
+### **Example 1: Whole Plot Transfer**
+
+```
+POST http://localhost:8000/api/setter/request-transfer-using-names
+Content-Type: application/json
+
+{
+  "transferPlot": true,
+  "plotName": "Plot 7",
+  "to": "0x0987654321098765432109876543210987654321"
+}
+```
+
+**Request Body Parameters (Plot Transfer):**
+
+- `transferPlot` (boolean, required): Must be `true` for plot transfer
+- `plotName` (string, required): Name of the plot to transfer
+- `to` (string, required): Recipient Ethereum address
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "requestId": "1",
+    "transferType": "PLOT_TRANSFER",
+    "plotName": "Plot 7",
+    "plotId": "7",
+    "to": "0x0987654321098765432109876543210987654321",
+    "transaction": {
+      "hash": "0x1234567890abcdef1234567890abcdef12345678",
+      "gasUsed": "21000",
+      "status": 1
+    },
+    "confirmedAt": "2024-01-15T10:30:00.000Z"
+  },
+  "message": "Plot transfer request created successfully using plot name"
+}
+```
+
+### **Example 2: Parcel Transfer**
+
+```
+POST http://localhost:8000/api/setter/request-transfer-using-names
+Content-Type: application/json
+
+{
+  "transferPlot": false,
+  "blockName": "Block A1",
+  "parcelName": "Parcel P2",
+  "parcelAmount": 1,
+  "plotName": "Soumalya Plot 1",
+  "to": "0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd"
+}
+```
+
+**Request Body Parameters (Parcel Transfer):**
+
+- `transferPlot` (boolean, required): Must be `false` for parcel transfer
+- `blockName` (string, required): Name of the block
+- `parcelName` (string, required): Name of the parcel
+- `parcelAmount` (number, required): Amount of tokens to transfer
+- `plotName` (string, required): Name of the plot containing the parcel
+- `to` (string, required): Recipient Ethereum address
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "requestId": "2",
+    "transferType": "PARCEL_TRANSFER",
+    "blockName": "Block A1",
+    "parcelName": "Parcel P2",
+    "parcelId": "5",
+    "parcelAmount": 1,
+    "plotName": "Soumalya Plot 1",
+    "plotId": "1",
+    "to": "0xeefb89a2a00f8206abb031f0c4d9fa07861c5bbd",
+    "transaction": {
+      "hash": "0x1234567890abcdef1234567890abcdef12345678",
+      "gasUsed": "21000",
+      "status": 1
+    },
+    "confirmedAt": "2024-01-15T10:30:00.000Z"
+  },
+  "message": "Parcel transfer request created successfully using names"
+}
+```
+
+**Conditions & Restrictions:**
+
+- **Plot Transfer:**
+  - Can only be initiated if the sender has 100% ownership of the plot
+  - Plot name must exist on the blockchain
+  - Transfer requires approval from all three authorities
+- **Parcel Transfer:**
+  - All provided names (block, parcel, plot) must exist on the blockchain
+  - Sender must have sufficient balance of the parcel tokens
+  - Plot must contain the specified parcel
+  - Transfer requires approval from all three authorities
+
+**Error Response (Plot Not Found):**
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Plot name not found on blockchain",
+    "details": "No plot found with name 'Plot 99'",
+    "code": "PLOT_NOT_FOUND",
+    "timestamp": "2025-10-05T13:00:00.000Z",
+    "endpoint": "/api/setter/request-transfer-using-names"
+  }
+}
+```
+
+**Error Response (Parcel Not Found):**
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Parcel not found on blockchain",
+    "details": "No parcel found with blockName 'Block 99' and parcelName 'Parcel 99'",
+    "code": "PARCEL_NOT_FOUND",
+    "timestamp": "2025-10-05T13:00:00.000Z",
+    "endpoint": "/api/setter/request-transfer-using-names"
   }
 }
 ```
@@ -1232,11 +1389,11 @@ Content-Type: application/json
 
 # Complete Endpoint Summary
 
-## Total Endpoints: 22
+## Total Endpoints: 24
 
 ### By Category:
 
-- **Setter Endpoints (Blockchain Writes):** 6
+- **Setter Endpoints (Blockchain Writes):** 8
 - **Blockchain Get Calls - Land:** 8
 - **Blockchain Get Calls - Plot:** 5
 - **Database Management:** 6
@@ -1245,6 +1402,6 @@ Content-Type: application/json
 ### By HTTP Method:
 
 - **GET:** 19 endpoints
-- **POST:** 6 endpoints
+- **POST:** 8 endpoints
 
 ---
